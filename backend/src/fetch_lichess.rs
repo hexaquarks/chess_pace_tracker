@@ -1,72 +1,80 @@
 use crate::api::{ChessDataRequest, ChessDataResponse};
-use actix_web::{web, Error};
-use futures_util::StreamExt;
-use reqwest;
-use serde_json::{self, Value};
-use tokio::io::{AsyncBufReadExt, BufReader};
+
+use futures::stream::StreamExt;
+use lichess_api::client::LichessApi;
+use lichess_api::model::games::export::by_user::{GetQuery, GetRequest};
+use lichess_api::model::games::export::Base;
+
+use config::{Config, File};
+use serde_json;
 
 pub async fn fetch_lichess_player_data(
     request_data: ChessDataRequest,
-) -> Result<ChessDataResponse, Error> {
+) -> Result<ChessDataResponse, actix_web::Error> {
+    let mut settings = Config::default();
+    settings
+        .merge(File::with_name("keys"))
+        .expect("Failed to read keys file");
+
+    let api_key = settings
+        .get::<String>("api_key")
+        .expect("API key not found in keys file");
+
     let client = reqwest::Client::new();
-    let url = format!(
-        "https://lichess.org/api/games/user/{}?max={}&rated=true&clocks=true&pgnInJson=true",
-        request_data.username, request_data.games_count,
-    );
+    let api_token = Some(api_key); // Replace with actual token
+    let api = LichessApi::new(&client, api_token);
 
-    let res = client
-        .get(&url)
-        .header("Accept", "application/x-ndjson")
-        .send()
-        .await
-        .map_err(|e| {
-            actix_web::error::ErrorInternalServerError(format!("Request failed: {:?}", e))
-        })?;
+    // Construct the GetQuery object
+    let base = Base {
+        moves: true,
+        pgn_in_json: true,
+        tags: true,
+        clocks: true,
+        evals: false,
+        accuracy: false,
+        opening: false,
+        literate: false,
+        players: None,
+    };
 
-    if !res.status().is_success() {
-        return Err(Error::from(actix_web::error::ErrorInternalServerError(
-            "Lichess API returned non-success status",
-        )));
+    let query = GetQuery {
+        base: base,
+        since: None,
+        until: None,
+        max: request_data.games_count as u64,
+        vs: None,
+        rated: Some(true),
+        perf_type: None,
+        color: None,
+        analysed: None,
+        ongoing: None,
+        finished: None,
+        last_fen: None,
+        sort: None,
+    };
+
+    let request = GetRequest::new(&request_data.username, query);
+
+    match api.export_games_of_user(request).await {
+        Ok(stream) => {
+            stream
+                .for_each(|game_result| async {
+                    match game_result {
+                        Ok(game) => {
+                            println!("{:#?}", game);
+                        }
+                        Err(e) => eprintln!("Error processing game: {:?}", e),
+                    }
+                })
+                .await;
+
+            Ok(ChessDataResponse { time: 14 })
+        }
+        Err(e) => {
+            eprintln!("Failed to fetch games: {:?}", e);
+            Err(actix_web::error::ErrorInternalServerError(
+                "Failed to fetch games",
+            ))
+        }
     }
-
-    let body = res.bytes_stream();
-    let reader = BufReader::new(tokio_util::io::StreamReader::new(body));
-    let mut lines = reader.lines();
-
-    let mut games = Vec::new();
-
-    while let Some(line) = lines
-        .next_line()
-        .await
-        .map_err(|e| actix_web::error::ErrorInternalServerError(format!("Line error: {:?}", e)))?
-    {
-        let line = line.map_err(|e| {
-            actix_web::error::ErrorInternalServerError(format!("Line error: {:?}", e))
-        })?;
-        let game: Value = serde_json::from_str(&line).map_err(|e| {
-            actix_web::error::ErrorInternalServerError(format!("JSON parse error: {:?}", e))
-        })?;
-        games.push(game);
-    }
-
-    for game in games.iter() {
-        println!("{}", serde_json::to_string_pretty(&game).unwrap());
-    }
-    // match json_result {
-    //     Ok(json) => {
-    //         // If you just want to print the JSON to the console for debugging:
-    //         // println!("Received JSON: {:?}", json);
-    //         println!("{}", serde_json::to_string_pretty(&json).unwrap());
-    //     }
-    //     Err(e) => {
-    //         println!("Failed to parse JSON: {:?}", e);
-    //     }
-    // }
-    // let data = res.json::<ChessDataResponse>().await.map_err(|_| {
-    //     Error::from(actix_web::error::ErrorInternalServerError(
-    //         "Failed to parse response from Lichess",
-    //     ))
-    // })?;
-    println!("Here 3");
-    Ok(ChessDataResponse { time: 15 })
 }
