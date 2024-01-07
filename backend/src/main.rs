@@ -2,6 +2,7 @@ use actix_cors::Cors;
 use actix_web::{http::header, App, HttpServer};
 
 mod api;
+mod data_processor;
 mod deserialization;
 mod fetch_lichess;
 
