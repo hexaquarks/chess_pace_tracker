@@ -29,6 +29,7 @@ pub async fn send_request(request_data: &ChessDataRequest) -> Result<Response, E
     res
 }
 
+#[derive(Clone)]
 pub struct TimedMove {
     pub move_key: String,
     pub move_time: i64,
