@@ -5,6 +5,7 @@ mod api;
 mod data_processor;
 mod deserialization;
 mod fetch_lichess;
+mod util;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
