@@ -8,11 +8,11 @@ interface RequestInformation {
 
 function App() {
   const [username, setUsername] = useState<string>('');
-  const [gamesCount, setGamesCount] = useState<number>(0); 
+  const [gamesCount, setGamesCount] = useState<number>(0);
 
   const sendDataToBackend = async () => {
     try {
-      const payload : RequestInformation = {
+      const payload: RequestInformation = {
         username: username,
         games_count: gamesCount
       };

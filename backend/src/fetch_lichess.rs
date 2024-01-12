@@ -169,7 +169,6 @@ pub async fn fetch_lichess_player_data(
                 Ok(game_bytes) => {
                     let game: GameJson =
                         serde_json::from_slice(&game_bytes).expect("Failed to serialize GameJson");
-                    //println!("{:#?}", game);
 
                     let game_info =
                         generate_game_info_struct(&game, &game_idx, &request_data.username);
@@ -188,10 +187,9 @@ pub async fn fetch_lichess_player_data(
         })
         .await;
 
-    let time = process_average_time(&games_info, &mut skipped_games);
-    // find game time differencial at half-time
-    // do average within all games
-    // possible errors:
+    let average_half_time_differential = process_average_time(&games_info, &mut skipped_games);
 
-    Ok(ChessDataResponse { time: 15 })
+    Ok(ChessDataResponse {
+        time: average_half_time_differential,
+    })
 }

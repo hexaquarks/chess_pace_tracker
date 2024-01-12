@@ -49,7 +49,7 @@ pub fn process_average_time(
             // Skip it from the computation.
             continue;
         }
-        if (game_info.timed_moves.len() < MIN_NUMBER_OF_MOVES_IN_GAME) {
+        if game_info.timed_moves.len() < MIN_NUMBER_OF_MOVES_IN_GAME {
             // skip this game and add it to vector of warnings with warning
             skipped_games
                 .entry(i)

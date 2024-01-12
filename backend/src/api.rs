@@ -10,7 +10,7 @@ pub struct ChessDataRequest {
 
 #[derive(Serialize)]
 pub struct ChessDataResponse {
-    pub time: i32,
+    pub time: f32,
 }
 
 #[post("/fetch-chess-data")]
