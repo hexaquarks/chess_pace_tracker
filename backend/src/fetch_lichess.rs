@@ -5,6 +5,7 @@ use actix_web::Error;
 use futures_util::StreamExt;
 use reqwest::Response;
 use serde_json::{self};
+use std::collections::HashMap;
 
 pub fn get_url(request_data: &ChessDataRequest) -> String {
     let url = format!(
@@ -28,8 +29,13 @@ pub async fn send_request(request_data: &ChessDataRequest) -> Result<Response, E
     res
 }
 
-pub fn generate_timed_moves(game: &GameJson) -> Vec<(String, i64)> {
-    let mut timed_moves: Vec<(String, i64)> = Vec::new();
+pub struct TimedMove {
+    pub move_key: String,
+    pub move_time: i64,
+}
+
+pub fn generate_timed_moves(game: &GameJson) -> Vec<TimedMove> {
+    let mut timed_moves: Vec<TimedMove> = Vec::new();
 
     let moves: Vec<String> = game
         .moves
@@ -54,7 +60,10 @@ pub fn generate_timed_moves(game: &GameJson) -> Vec<(String, i64)> {
     }
 
     for (i, x) in moves.iter().cloned().enumerate() {
-        timed_moves.push((x, clocks[i]));
+        timed_moves.push(TimedMove {
+            move_key: x,
+            move_time: clocks[i],
+        });
     }
     timed_moves
 }
@@ -76,7 +85,7 @@ pub enum GlobalFetchError {
 
 pub struct GameInfo {
     pub game_index: usize,
-    pub timed_moves: Vec<(String, i64)>,
+    pub timed_moves: Vec<TimedMove>,
     pub user_color: String,
     pub user_rating: i32,
     pub opponent_rating: i32,
@@ -149,6 +158,7 @@ pub async fn fetch_lichess_player_data(
         )));
     }
 
+    let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
     let mut games_info: Vec<GameInfo> = Vec::new();
     let mut game_idx: usize = 0;
     let stream = request_response.bytes_stream();
@@ -163,16 +173,21 @@ pub async fn fetch_lichess_player_data(
                     let game_info =
                         generate_game_info_struct(&game, &game_idx, &request_data.username);
                     games_info.push(game_info);
-
                     game_idx += 1;
                 }
-                Err(e) => eprintln!("Error processing game: {:?}", e),
+                Err(e) => {
+                    eprintln!("Error processing game: {:?}", e);
+                    skipped_games
+                        .entry(game_idx)
+                        .or_insert(GameFetchWarning::InternalErrorOccuredWhileProcessingAGame);
+                    game_idx += 1;
+                }
             }
             async { () } // <-- Jfl absolutely cursed
         })
         .await;
 
-    let time = process_average_time(&games_info);
+    let time = process_average_time(&games_info, &mut skipped_games);
     // find game time differencial at half-time
     // do average within all games
     // possible errors:
