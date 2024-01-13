@@ -1,12 +1,14 @@
 use crate::fetch_lichess::fetch_lichess_player_data;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use serde_repr::{Serialize_repr, Deserialize_repr};
 
-#[derive(Serialize)]
+#[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug)]
+#[repr(i32)]
 pub enum DescriptionMessageAssessment {
-    Positive,
-    Neutral,
-    Negative,
+    Positive = 0,
+    Neutral = 1,
+    Negative = 2,
 }
 
 #[derive(Deserialize, Debug)]

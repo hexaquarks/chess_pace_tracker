@@ -1,4 +1,4 @@
-use crate::api::{ChessDataRequest, ChessDataResponse};
+use crate::api::{ChessDataRequest, ChessDataResponse, DescriptionMessageAssessment};
 use crate::data_processor::process_average_time;
 use crate::deserialization::GameJson;
 use crate::message_generator::get_explanation_message;
@@ -192,9 +192,10 @@ pub async fn fetch_lichess_player_data(
         .await;
 
     let average_half_time_differential = process_average_time(&games_info, &mut skipped_games);
-
+    let temp = String::from("3.0");
     Ok(ChessDataResponse {
         time: average_half_time_differential,
-        explanation_message: get_explanation_message(average_half_time_differential),
+        // explanation_message: get_explanation_message(average_half_time_differential),
+        explanation_message: (temp, DescriptionMessageAssessment::Positive)
     })
 }
