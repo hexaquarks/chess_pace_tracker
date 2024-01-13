@@ -9,8 +9,11 @@ use std::collections::HashMap;
 
 pub fn get_url(request_data: &ChessDataRequest) -> String {
     let url = format!(
-        "https://lichess.org/api/games/user/{}?max={}&rated=true&clocks=true",
-        request_data.username, request_data.games_count,
+        "https://lichess.org/api/games/user/{}?max={}&perfType={}&color={}&rated=true&clocks=true",
+        request_data.username,
+        request_data.games_count,
+        request_data.game_mode,
+        request_data.user_color
     );
     url
 }

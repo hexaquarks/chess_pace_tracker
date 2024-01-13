@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 pub struct ChessDataRequest {
     pub username: String,
     pub games_count: i32,
+    pub game_mode: String,
+    pub user_color: String,
 }
 
 #[derive(Serialize)]
