@@ -2,6 +2,13 @@ use crate::fetch_lichess::fetch_lichess_player_data;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
+#[derive(Serialize)]
+pub enum DescriptionMessageAssessment {
+    Positive,
+    Neutral,
+    Negative,
+}
+
 #[derive(Deserialize, Debug)]
 pub struct ChessDataRequest {
     pub username: String,
@@ -13,6 +20,7 @@ pub struct ChessDataRequest {
 #[derive(Serialize)]
 pub struct ChessDataResponse {
     pub time: f32,
+    pub explanation_message: (String, DescriptionMessageAssessment),
 }
 
 #[post("/fetch-chess-data")]

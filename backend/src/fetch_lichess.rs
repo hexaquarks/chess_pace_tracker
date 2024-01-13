@@ -1,6 +1,7 @@
 use crate::api::{ChessDataRequest, ChessDataResponse};
 use crate::data_processor::process_average_time;
 use crate::deserialization::GameJson;
+use crate::message_generator::get_explanation_message;
 use actix_web::Error;
 use futures_util::StreamExt;
 use reqwest::Response;
@@ -194,5 +195,6 @@ pub async fn fetch_lichess_player_data(
 
     Ok(ChessDataResponse {
         time: average_half_time_differential,
+        explanation_message: get_explanation_message(average_half_time_differential),
     })
 }
