@@ -1,5 +1,3 @@
-import { TupleType } from "typescript";
-
 interface RequestInformation {
   username: string;
   games_count: number;
@@ -13,7 +11,7 @@ enum MessageInformationAssessment {
   Negative
 }
 
-interface ResponseInformation {
+export interface ResponseInformation {
   time: number; 
   explanation_message: [string, MessageInformationAssessment]
 }
@@ -22,7 +20,7 @@ export const sendDataToBackend = async (
   username: string,
   gamesCount: number,
   gameMode: string,
-  userColor: string) => {
+  userColor: string): Promise<ResponseInformation> => {
   try {
     const payload: RequestInformation = {
       username,
@@ -44,10 +42,14 @@ export const sendDataToBackend = async (
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: any = await response.json();
+    const data: ResponseInformation = await response.json();
     console.log(data);
-    console.log(data.explanation_message)
+
+    return data;
+
   } catch (error) {
     console.error('Error sending data to backend', error);
+
+    throw error;
   }
 };
