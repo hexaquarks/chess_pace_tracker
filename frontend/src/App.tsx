@@ -1,66 +1,38 @@
 import React, { useState } from 'react';
-import './App.css';
-
-interface RequestInformation {
-  username: string;
-  games_count: number;
-}
+import UsernameInput from './components/UsernameInput';
+import GamesCountInput from './components/GamesCountInput';
+import GameModeInput from './components/GameModeInput';
+import UserColorInput from './components/UserColorInput';
+import SendDataButton from './components/SendDataButton';
+import { sendDataToBackend } from './services/apiService';
 
 function App() {
   const [username, setUsername] = useState<string>('');
   const [gamesCount, setGamesCount] = useState<number>(0);
-
-  const sendDataToBackend = async () => {
-    try {
-      const payload: RequestInformation = {
-        username: username,
-        games_count: gamesCount
-      };
-      console.log('Sending:', payload);
-
-      const response = await fetch('http://localhost:8000/fetch-chess-data', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.error('Error sending data to backend', error);
-    }
-  };
-
-  const handleGamesCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(event.target.value, 10);
-    setGamesCount(isNaN(value) ? 0 : value);
-  };
+  const [gameMode, setGameMode] = useState<string>('bullet');
+  const [userColor, setUserColor] = useState<string>('white');
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter username"
-        />
-        <input
-          type="number"
-          value={gamesCount}
-          onChange={handleGamesCountChange}
-          placeholder="Enter number of games"
-        />
-        <button onClick={sendDataToBackend}>Send Data</button>
-      </header>
+    <div className="flex justify-center items-center h-screen bg-gray-900">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-md">
+        <div className="mb-4">
+          <UsernameInput value={username} onChange={setUsername} />
+        </div>
+        <div className="mb-4">
+          <GamesCountInput value={gamesCount} onChange={setGamesCount} max={50}/>
+        </div>
+        <div className="mb-4">
+          <GameModeInput value={gameMode} onChange={setGameMode} />
+        </div>
+        <div className="mb-4">
+          <UserColorInput value={userColor} onChange={setUserColor} />
+        </div>
+        <div className="flex items-center justify-between">
+          <SendDataButton onClick={() => sendDataToBackend( username, gamesCount, gameMode, userColor )} />
+        </div>
+      </div>
     </div>
   );
 }
 
-export default App
+export default App;
