@@ -1,6 +1,6 @@
 # Chess Pace Tracker
 
-## Description and Goals
+### Description and Goals
 Chess Pace Tracker is an innovative tool designed for online chess players. 
 It provides insights into a player's time management during games, a critical component of competitive play, especially in faster-paced variants.
 
