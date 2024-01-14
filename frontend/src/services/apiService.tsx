@@ -5,11 +5,22 @@ interface RequestInformation {
   user_color: string;
 }
 
+enum MessageInformationAssessment {
+  Positive,
+  Neutral,
+  Negative
+}
+
+export interface ResponseInformation {
+  time: number; 
+  explanation_message: [string, MessageInformationAssessment]
+}
+
 export const sendDataToBackend = async (
   username: string,
   gamesCount: number,
   gameMode: string,
-  userColor: string) => {
+  userColor: string): Promise<ResponseInformation> => {
   try {
     const payload: RequestInformation = {
       username,
@@ -31,9 +42,14 @@ export const sendDataToBackend = async (
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: ResponseInformation = await response.json();
     console.log(data);
+
+    return data;
+
   } catch (error) {
     console.error('Error sending data to backend', error);
+
+    throw error;
   }
 };
