@@ -1,4 +1,4 @@
-use crate::fetch_lichess::GameFetchWarning;
+use crate::api::GameFetchWarning;
 use crate::game_info_generator::{GameInfo, TimedMove};
 use crate::util;
 use std::collections::HashMap;

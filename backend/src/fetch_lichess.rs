@@ -1,4 +1,4 @@
-use crate::api::{ChessDataRequest, ChessDataResponse, DescriptionMessageAssessment};
+use crate::api::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
 use crate::data_processor::process_average_time;
 use crate::deserialization::GameJson;
 use crate::game_info_generator::{generate_game_info_struct, GameInfo};
@@ -32,21 +32,6 @@ pub async fn send_request(request_data: &ChessDataRequest) -> Result<Response, E
             actix_web::error::ErrorInternalServerError(format!("Request failed: {:?}", e))
         });
     res
-}
-
-// UI -> Panel with scroll bar errors
-//    -> maybe warning and error sections?
-// for instance, game 5 -> not enough moves,
-
-// Skip games in fetch
-pub enum GameFetchWarning {
-    GameHasNotEnoughMoves,
-    InternalErrorOccuredWhileProcessingAGame,
-}
-
-pub enum GlobalFetchError {
-    RequestedMoreGamesThanAvailableInTheUserDatabase,
-    NotEnoughGamesToComputeAverage, // n == 0
 }
 
 pub async fn get_games_info_from_response_stream(
@@ -101,9 +86,9 @@ pub async fn fetch_lichess_player_data(
             .await;
 
     let average_half_time_differential = process_average_time(&games_info, &mut skipped_games);
-
-    Ok(ChessDataResponse {
-        time: average_half_time_differential,
-        explanation_message: get_explanation_message(average_half_time_differential),
-    })
+    Ok(ChessDataResponse::new(
+        average_half_time_differential,
+        get_explanation_message(average_half_time_differential),
+        skipped_games,
+    ))
 }

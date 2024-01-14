@@ -14,6 +14,7 @@ enum MessageInformationAssessment {
 export interface ResponseInformation {
   time: number; 
   explanation_message: [string, MessageInformationAssessment]
+  games_with_error: Array<[number, string]>
 }
 
 export const sendDataToBackend = async (
@@ -44,7 +45,7 @@ export const sendDataToBackend = async (
 
     const data: ResponseInformation = await response.json();
     console.log(data);
-
+    
     return data;
 
   } catch (error) {
