@@ -8,9 +8,9 @@ import { sendDataToBackend, ResponseInformation } from './services/apiService';
 import ResponsePanel from './components/ResponsePanel';
 
 function App() {
-  const [username, setUsername] = useState<string>('');
-  const [gamesCount, setGamesCount] = useState<number>(0);
-  const [gameMode, setGameMode] = useState<string>('bullet');
+  const [username, setUsername] = useState<string>('physicskush');
+  const [gamesCount, setGamesCount] = useState<number>(3);
+  const [gameMode, setGameMode] = useState<string>('blitz');
   const [userColor, setUserColor] = useState<string>('white');
 
   const [response, setResponse] = useState<ResponseInformation | null>(null);
