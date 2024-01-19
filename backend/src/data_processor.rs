@@ -1,4 +1,5 @@
-use crate::fetch_lichess::{GameFetchWarning, GameInfo, TimedMove};
+use crate::api::GameFetchWarning;
+use crate::game_info_generator::{GameInfo, TimedMove};
 use crate::util;
 use std::collections::HashMap;
 
@@ -41,7 +42,7 @@ pub fn compute_curr_game_time_differential(game: &GameInfo) -> i32 {
 pub fn process_average_time(
     games: &[GameInfo],
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
-) -> f32 {
+) -> Option<f32> {
     let mut half_time_differentials = Vec::new();
     for (i, game_info) in games.iter().enumerate() {
         if skipped_games.contains_key(&i) {
@@ -49,7 +50,7 @@ pub fn process_average_time(
             // Skip it from the computation.
             continue;
         }
-        if game_info.timed_moves.len() < MIN_NUMBER_OF_MOVES_IN_GAME {
+        if game_info.timed_moves.len() > MIN_NUMBER_OF_MOVES_IN_GAME {
             // skip this game and add it to vector of warnings with warning
             skipped_games
                 .entry(i)
@@ -61,6 +62,13 @@ pub fn process_average_time(
         half_time_differentials.push(curr_game_time_differential);
     }
 
+    if half_time_differentials.len() == 0 {
+        // NO games were kept in the computation. The time average is undefined
+        return None;
+    }
+
     let average_half_time_differentials = util::compute_average(&half_time_differentials);
-    util::convert_centiseconds_to_seconds(average_half_time_differentials)
+    Some(util::convert_centiseconds_to_seconds(
+        average_half_time_differentials,
+    ))
 }

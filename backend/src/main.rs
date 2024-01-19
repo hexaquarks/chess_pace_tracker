@@ -5,6 +5,7 @@ mod api;
 mod data_processor;
 mod deserialization;
 mod fetch_lichess;
+mod game_info_generator;
 mod message_generator;
 mod util;
 

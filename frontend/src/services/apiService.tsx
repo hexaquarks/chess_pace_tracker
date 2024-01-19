@@ -5,7 +5,7 @@ interface RequestInformation {
   user_color: string;
 }
 
-enum MessageInformationAssessment {
+export enum MessageInformationAssessment {
   Positive,
   Neutral,
   Negative
@@ -14,6 +14,7 @@ enum MessageInformationAssessment {
 export interface ResponseInformation {
   time: number; 
   explanation_message: [string, MessageInformationAssessment]
+  games_with_errors: Array<[number, string]>
 }
 
 export const sendDataToBackend = async (
@@ -44,7 +45,10 @@ export const sendDataToBackend = async (
 
     const data: ResponseInformation = await response.json();
     console.log(data);
-
+    if (!data.games_with_errors) {
+      console.log("its empt");
+    }
+    
     return data;
 
   } catch (error) {
