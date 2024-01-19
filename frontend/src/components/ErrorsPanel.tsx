@@ -15,21 +15,21 @@ const ErrorsPanel: React.FC<ErrorsPanelProps> = ({ gamesWithError }) => {
         )
       }
   
-    const iconSize = 'h-20 w-20';
+    const iconSize = 'h-14 w-14';
     
     return (
-      <div className="flex flex-col items-center space-x-2 p-4 rounded-lg bg-gray-800 text-white w-full">
-        {gamesWithError.map(([gameNumber, errorMessage], i) => (
-          <div key={i} className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-            <ExclamationTriangleIcon className={`${iconSize} text-yellow-500`} />
-            <div className="flex flex-col justify-between p-4 leading-normal">
-              <span className="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">Game {gameNumber}</span>
-              <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{errorMessage}</p>
+        <div className="flex flex-col items-center rounded-lg bg-gray-800 text-white w-full">
+          {gamesWithError.map(([gameNumber, errorMessage], i) => (
+            <div key={i} className="flex flex-col items-center w-full pl-2 bg-white rounded-lg shadow md:flex-row hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
+              <ExclamationTriangleIcon className={`${iconSize} text-yellow-500`} />
+              <div className="flex flex-col justify-between w-full p-4 leading-normal">
+                <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Game {gameNumber}</span>
+                <p className="font-normal text-gray-700 dark:text-gray-400">{errorMessage}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    );
+          ))}
+        </div>
+      );      
   };
   
   export default ErrorsPanel;
