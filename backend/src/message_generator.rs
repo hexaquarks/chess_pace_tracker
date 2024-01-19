@@ -1,9 +1,30 @@
 use crate::api::DescriptionMessageAssessment;
 use string_builder::Builder;
 
+const INVALID_TIME_DESCRIPTION_PLACEHOLDER_MSG: &str =
+    "The time value was not computed. Check the errors panel for more information.";
+
+pub fn get_average_time_string_fmt(average_half_time_differential_opt: Option<f32>) -> String {
+    if average_half_time_differential_opt.is_none() {
+        return String::from("Undefined ");
+    } else {
+        return average_half_time_differential_opt.unwrap().to_string();
+    }
+}
+
 pub fn get_explanation_message(
-    average_half_time_differential: f32,
+    average_half_time_differential_opt: Option<f32>,
 ) -> (String, DescriptionMessageAssessment) {
+    // Edge case, no games were used in time computation
+    if average_half_time_differential_opt.is_none() {
+        return (
+            INVALID_TIME_DESCRIPTION_PLACEHOLDER_MSG.to_string(),
+            DescriptionMessageAssessment::Negative,
+        );
+    }
+
+    let average_half_time_differential = average_half_time_differential_opt.unwrap();
+
     let mut message_assessment;
     let mut message_builder = Builder::default();
     message_builder.append("On average, you are ");

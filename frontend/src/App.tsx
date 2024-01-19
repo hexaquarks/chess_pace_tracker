@@ -4,7 +4,7 @@ import GamesCountInput from './components/GamesCountInput';
 import GameModeInput from './components/GameModeInput';
 import UserColorInput from './components/UserColorInput';
 import SendDataButton from './components/SendDataButton';
-import { sendDataToBackend, ResponseInformation } from './services/apiService';
+import { sendDataToBackend, ResponseInformation, MessageInformationAssessment } from './services/apiService';
 import ResponsePanel from './components/ResponsePanel';
 import ErrorsPanel from './components/ErrorsPanel';
 
@@ -56,7 +56,7 @@ function App() {
       {response && (
         <div className="w-1/4 flex flex-col items-center justify-center h-screen">
           <ErrorsPanel
-            gamesWithError={response.games_with_error}
+            gamesWithError={response.games_with_errors}
           />
         </div>
       )}

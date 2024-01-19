@@ -34,14 +34,14 @@ pub struct ChessDataRequest {
 
 #[derive(Serialize)]
 pub struct ChessDataResponse {
-    pub time: f32,
+    pub time: String,
     pub explanation_message: (String, DescriptionMessageAssessment),
     pub games_with_errors: Vec<(usize, GameFetchWarning)>,
 }
 
 impl ChessDataResponse {
     pub fn new(
-        time: f32,
+        time: String,
         explanation_message: (String, DescriptionMessageAssessment),
         games_with_errors: HashMap<usize, GameFetchWarning>,
     ) -> Self {

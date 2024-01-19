@@ -2,7 +2,7 @@ use crate::api::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
 use crate::data_processor::process_average_time;
 use crate::deserialization::GameJson;
 use crate::game_info_generator::{generate_game_info_struct, GameInfo};
-use crate::message_generator::get_explanation_message;
+use crate::message_generator::{get_average_time_string_fmt, get_explanation_message};
 use actix_web::Error;
 use futures_util::StreamExt;
 use reqwest::Response;
@@ -87,7 +87,7 @@ pub async fn fetch_lichess_player_data(
 
     let average_half_time_differential = process_average_time(&games_info, &mut skipped_games);
     Ok(ChessDataResponse::new(
-        average_half_time_differential,
+        get_average_time_string_fmt(average_half_time_differential),
         get_explanation_message(average_half_time_differential),
         skipped_games,
     ))
