@@ -44,7 +44,7 @@ function App() {
         </div>
 
         {response && (
-          <div className="w-1/4 h-1/4 self-end">
+          <div className="w-1/4 max-h-[calc(100vh*0.45)] overflow-y-auto self-begin">
             <ErrorsPanel
               gamesWithError={response.games_with_errors}
             />

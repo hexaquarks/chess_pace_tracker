@@ -27,7 +27,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ time, explanationMessage 
   };
 
   return (
-    <div className="flex items-center space-x-2 p-4 rounded-lg bg-gray-800 text-white w-full">
+    <div className="flex items-center space-x-2 rounded-lg bg-gray-800 text-white w-full">
       <div className="flex-shrink-0">
         <IconGetter />
       </div>

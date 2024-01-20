@@ -18,7 +18,7 @@ const ErrorsPanel: React.FC<ErrorsPanelProps> = ({ gamesWithError }) => {
     const iconSize = 'h-14 w-14';
     
     return (
-        <div className="flex flex-col items-center rounded-lg bg-gray-800 text-white w-full">
+        <div className="flex flex-col h-full items-center pl-2 rounded-lg bg-gray-800 text-white w-full">
           {gamesWithError.map(([gameNumber, errorMessage], i) => (
             <div key={i} className="flex flex-col items-center w-full pl-2 bg-white rounded-lg shadow md:flex-row hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
               <ExclamationTriangleIcon className={`${iconSize} text-yellow-500`} />
