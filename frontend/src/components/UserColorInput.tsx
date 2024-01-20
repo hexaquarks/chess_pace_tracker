@@ -19,7 +19,7 @@ const UserColorInput: React.FC<UserColorInputProps> = ({ value, onChange }) => (
       <option value="white">White</option>
       <option value="black">Black</option>
     </select>
-    <div className="border-b border-gray-500"></div>
+    <div className="border-b border-gray-500 mb-2"></div>
   </div>
 );
 
