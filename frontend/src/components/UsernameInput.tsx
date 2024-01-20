@@ -18,7 +18,7 @@ const UsernameInput: React.FC<UsernameInputProps> = ({ value, onChange }) => (
       value={value}
       onChange={(e) => onChange(e.target.value)}
     />
-    <div className="border-b border-gray-500"></div>
+    <div className="border-b border-gray-500 mb-2"></div>
   </div>
 );
 

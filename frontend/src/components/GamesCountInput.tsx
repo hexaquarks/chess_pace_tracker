@@ -20,7 +20,7 @@ const GamesCountInput: React.FC<GamesCountInputProps> = ({ value, onChange, max 
       onChange={(e) => onChange(e.target.valueAsNumber)}
       max={max}
     />
-    <div className="border-b border-gray-500"></div>
+    <div className="border-b border-gray-500 mb-2"></div>
   </div>
 );
 

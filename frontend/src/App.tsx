@@ -22,47 +22,36 @@ function App() {
   };
 
   return (
-    <div className="flex felx-row items-center justify-center w-screen bg-zinc-900">
-      <div className="flex flex-col items-center justify-center h-screen">
-        <div className="mb-8 w-full max-w-2xl px-4">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-md w-full">
-            <div className="mb-4">
-              <UsernameInput value={username} onChange={setUsername} />
-            </div>
-            <div className="mb-4">
-              <GamesCountInput value={gamesCount} onChange={setGamesCount} max={50} />
-            </div>
-            <div className="mb-4">
-              <GameModeInput value={gameMode} onChange={setGameMode} />
-            </div>
-            <div className="mb-4">
-              <UserColorInput value={userColor} onChange={setUserColor} />
-            </div>
-            <div className="flex items-center justify-between">
-              <SendDataButton onClick={handleSendData} />
-            </div>
+    <div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">
+      <div className="flex flex-row justify-center w-full max-w-7xl">
+        <div className="flex flex-col w-full max-w-2xl px-4">
+          <div className="bg-gray-800 p-7 rounded-lg shadow-md mb-8">
+            <UsernameInput value={username} onChange={setUsername} />
+            <GamesCountInput value={gamesCount} onChange={setGamesCount} max={50} />
+            <GameModeInput value={gameMode} onChange={setGameMode} />
+            <UserColorInput value={userColor} onChange={setUserColor} />
+            <SendDataButton onClick={handleSendData} />
           </div>
+
+          {response && (
+            <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+              <ResponsePanel
+                time={response.time}
+                explanationMessage={response.explanation_message}
+              />
+            </div>
+          )}
         </div>
 
         {response && (
-          <div className="w-full max-w-2xl px-4">
-            <ResponsePanel
-              time={response.time}
-              explanationMessage={response.explanation_message}
+          <div className="w-1/4 h-1/4 self-end">
+            <ErrorsPanel
+              gamesWithError={response.games_with_errors}
             />
           </div>
         )}
       </div>
-      {response && (
-        <div className="w-1/4 flex flex-col items-center justify-center h-screen">
-          <ErrorsPanel
-            gamesWithError={response.games_with_errors}
-          />
-        </div>
-      )}
-
     </div>
-
   );
 }
 

@@ -20,7 +20,7 @@ const GameModeInput: React.FC<GameModeInputProps> = ({ value, onChange }) => (
       <option value="blitz">Blitz</option>
       <option value="rapid">Rapid</option>
     </select>
-    <div className="border-b border-gray-500"></div>
+    <div className="border-b border-gray-500 mb-2"></div>
   </div>
 );
 
