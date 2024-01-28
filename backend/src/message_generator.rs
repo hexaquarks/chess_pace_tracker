@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::api::DescriptionMessageAssessment;
 use string_builder::Builder;
 
@@ -48,4 +50,8 @@ pub fn get_explanation_message(
     message_builder.append("at half time in the games.");
 
     (message_builder.string().unwrap(), message_assessment)
+}
+
+pub fn get_win_ratio_string_fmt(player_win_rate_in_fetched_games: f32) -> String {
+    format!("{:.2}", player_win_rate_in_fetched_games)
 }

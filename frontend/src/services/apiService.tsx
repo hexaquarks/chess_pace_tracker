@@ -15,6 +15,7 @@ export interface ResponseInformation {
   time: number; 
   explanation_message: [string, MessageInformationAssessment]
   games_with_errors: Array<[number, string]>
+  player_win_rate_in_fetched_games: number
 }
 
 export const sendDataToBackend = async (
