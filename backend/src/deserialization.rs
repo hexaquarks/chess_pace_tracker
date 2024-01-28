@@ -1,3 +1,4 @@
+use crate::api::GameFetchWarning;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -44,4 +45,31 @@ pub struct PlayerDetail {
 pub struct User {
     pub id: Option<String>,
     pub name: Option<String>,
+}
+
+pub fn convert_games_with_errors_to_displayable_format(
+    games_with_errors: HashMap<usize, GameFetchWarning>,
+) -> Vec<(usize, String)> {
+    let mut enum_conversion_map: HashMap<GameFetchWarning, String> = HashMap::new();
+    enum_conversion_map.insert(
+        GameFetchWarning::GameHasNotEnoughMoves,
+        String::from("Game does not have enough moves."),
+    );
+    enum_conversion_map.insert(
+        GameFetchWarning::InternalErrorOccuredWhileProcessingAGame,
+        String::from("An internal error occured while processing this game."),
+    );
+
+    games_with_errors
+        .into_iter()
+        .map(|(i, warning_enum)| {
+            (
+                i,
+                enum_conversion_map
+                    .get(&warning_enum)
+                    .expect("Warning enum not found")
+                    .to_string(),
+            )
+        })
+        .collect()
 }

@@ -1,3 +1,4 @@
+use crate::deserialization::convert_games_with_errors_to_displayable_format;
 use crate::fetch_lichess::fetch_lichess_player_data;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
@@ -12,10 +13,10 @@ pub enum DescriptionMessageAssessment {
     Negative = 2,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, PartialEq, Eq, Hash)]
 pub enum GameFetchWarning {
+    InternalErrorOccuredWhileProcessingAGame = 0,
     GameHasNotEnoughMoves,
-    InternalErrorOccuredWhileProcessingAGame,
 }
 
 #[derive(Serialize)]
@@ -36,7 +37,7 @@ pub struct ChessDataRequest {
 pub struct ChessDataResponse {
     pub time: String,
     pub explanation_message: (String, DescriptionMessageAssessment),
-    pub games_with_errors: Vec<(usize, GameFetchWarning)>,
+    pub games_with_errors: Vec<(usize, String)>,
     pub player_win_rate_in_fetched_games: String,
 }
 
@@ -48,7 +49,7 @@ impl ChessDataResponse {
         player_win_rate_in_fetched_games: String,
     ) -> Self {
         println!("HashMap contents: {:?}", games_with_errors);
-        let errors_vec = games_with_errors.into_iter().collect::<Vec<_>>();
+        let errors_vec = convert_games_with_errors_to_displayable_format(games_with_errors);
 
         ChessDataResponse {
             time,
