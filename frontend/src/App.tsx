@@ -7,6 +7,7 @@ import SendDataButton from './components/SendDataButton';
 import { sendDataToBackend, ResponseInformation, MessageInformationAssessment } from './services/apiService';
 import ResponsePanel from './components/ResponsePanel';
 import ErrorsPanel from './components/ErrorsPanel';
+import WinRateDonutChart from './components/WinRateDonutChart';
 
 function App() {
   const [username, setUsername] = useState<string>('physicskush');
@@ -44,10 +45,12 @@ function App() {
         </div>
 
         {response && (
-          <div className="w-1/4 max-h-[calc(100vh*0.45)] overflow-y-auto self-begin">
+          <div className="w-1/4 flex flex-col">
             <ErrorsPanel
               gamesWithError={response.games_with_errors}
             />
+            <WinRateDonutChart winRate={response.player_win_rate_in_fetched_games} />
+
           </div>
         )}
       </div>

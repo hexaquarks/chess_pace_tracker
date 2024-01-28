@@ -1,13 +1,16 @@
 use crate::api::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
-use crate::data_processor::process_average_time;
+use crate::data_processor::{process_average_time, process_win_rate};
 use crate::deserialization::GameJson;
 use crate::game_info_generator::{generate_game_info_struct, GameInfo};
-use crate::message_generator::{get_average_time_string_fmt, get_explanation_message};
+use crate::message_generator::{
+    get_average_time_string_fmt, get_explanation_message, get_win_ratio_string_fmt,
+};
 use actix_web::Error;
 use futures_util::StreamExt;
 use reqwest::Response;
 use serde_json::{self};
 use std::collections::HashMap;
+use std::fmt::Debug;
 
 pub fn get_url(request_data: &ChessDataRequest) -> String {
     let url = format!(
@@ -86,9 +89,12 @@ pub async fn fetch_lichess_player_data(
             .await;
 
     let average_half_time_differential = process_average_time(&games_info, &mut skipped_games);
+    let player_win_rate_in_fetched_games = process_win_rate(&games_info, &skipped_games);
+
     Ok(ChessDataResponse::new(
         get_average_time_string_fmt(average_half_time_differential),
         get_explanation_message(average_half_time_differential),
         skipped_games,
+        get_win_ratio_string_fmt(player_win_rate_in_fetched_games),
     ))
 }

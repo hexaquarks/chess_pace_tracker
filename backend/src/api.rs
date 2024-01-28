@@ -37,6 +37,7 @@ pub struct ChessDataResponse {
     pub time: String,
     pub explanation_message: (String, DescriptionMessageAssessment),
     pub games_with_errors: Vec<(usize, GameFetchWarning)>,
+    pub player_win_rate_in_fetched_games: String,
 }
 
 impl ChessDataResponse {
@@ -44,6 +45,7 @@ impl ChessDataResponse {
         time: String,
         explanation_message: (String, DescriptionMessageAssessment),
         games_with_errors: HashMap<usize, GameFetchWarning>,
+        player_win_rate_in_fetched_games: String,
     ) -> Self {
         println!("HashMap contents: {:?}", games_with_errors);
         let errors_vec = games_with_errors.into_iter().collect::<Vec<_>>();
@@ -52,6 +54,7 @@ impl ChessDataResponse {
             time,
             explanation_message,
             games_with_errors: errors_vec,
+            player_win_rate_in_fetched_games,
         }
     }
 }

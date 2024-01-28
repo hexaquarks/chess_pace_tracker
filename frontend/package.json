@@ -10,6 +10,7 @@
     "@types/node": "^16.18.68",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.17",
+    "apexcharts": "^3.45.2",
     "autoprefixer": "^10.4.16",
     "flowbite": "^2.2.1",
     "postcss": "^8.4.33",

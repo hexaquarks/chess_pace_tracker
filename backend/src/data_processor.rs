@@ -5,6 +5,10 @@ use std::collections::HashMap;
 
 const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 5;
 
+fn has_user_won_game(game: &GameInfo) -> bool {
+    game.user_color == game.winner_color
+}
+
 fn get_half_moves(
     timed_moves: &[TimedMove],
     middle_cut_idx: usize,
@@ -50,7 +54,7 @@ pub fn process_average_time(
             // Skip it from the computation.
             continue;
         }
-        if game_info.timed_moves.len() > MIN_NUMBER_OF_MOVES_IN_GAME {
+        if game_info.timed_moves.len() < MIN_NUMBER_OF_MOVES_IN_GAME {
             // skip this game and add it to vector of warnings with warning
             skipped_games
                 .entry(i)
@@ -71,4 +75,31 @@ pub fn process_average_time(
     Some(util::convert_centiseconds_to_seconds(
         average_half_time_differentials,
     ))
+}
+
+pub fn process_win_rate(
+    games: &[GameInfo],
+    skipped_games: &HashMap<usize, GameFetchWarning>,
+) -> f32 {
+    let mut n_games_considered = games.len();
+    let mut n_wins = 0;
+
+    for (i, game_info) in games.iter().enumerate() {
+        if skipped_games.contains_key(&i) {
+            // The current game has already an internal error.
+            // Skip it from the computation.
+            n_games_considered -= 1;
+            continue;
+        }
+
+        if has_user_won_game(game_info) {
+            n_wins += 1;
+        }
+    }
+
+    if n_wins == 0 {
+        return 0.0;
+    }
+
+    n_wins as f32 / n_games_considered as f32
 }
