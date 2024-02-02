@@ -10,7 +10,7 @@ pub fn convert_centiseconds_to_seconds(time: i32) -> f32 {
 }
 
 pub fn generate_dummy_erros_testing(skipped_games: &mut HashMap<usize, GameFetchWarning>) {
-    (0..5).for_each(|i| {
+    (0..6).for_each(|i| {
         skipped_games.entry(i).or_insert(if i % 2 == 0 {
             GameFetchWarning::GameHasNotEnoughMoves
         } else {

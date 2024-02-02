@@ -48,7 +48,6 @@ impl ChessDataResponse {
         games_with_errors: HashMap<usize, GameFetchWarning>,
         player_win_rate_in_fetched_games: String,
     ) -> Self {
-        println!("HashMap contents: {:?}", games_with_errors);
         let errors_vec = convert_games_with_errors_to_displayable_format(games_with_errors);
 
         ChessDataResponse {
