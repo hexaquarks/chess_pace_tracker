@@ -5,8 +5,15 @@ use std::collections::HashMap;
 
 const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 5;
 
+fn is_game_draw(game: &GameInfo) -> bool {
+    game.winner_color.is_none()
+}
+
 fn has_user_won_game(game: &GameInfo) -> bool {
-    game.user_color == game.winner_color
+    if game.winner_color.is_some() {
+        return game.user_color == *game.winner_color.as_ref().unwrap();
+    }
+    false
 }
 
 fn get_half_moves(
@@ -85,7 +92,7 @@ pub fn process_win_rate(
     let mut n_wins = 0;
 
     for (i, game_info) in games.iter().enumerate() {
-        if skipped_games.contains_key(&i) {
+        if skipped_games.contains_key(&i) || is_game_draw(game_info) {
             // The current game has already an internal error.
             // Skip it from the computation.
             n_games_considered -= 1;

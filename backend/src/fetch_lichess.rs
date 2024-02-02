@@ -51,7 +51,7 @@ pub async fn get_games_info_from_response_stream(
                 Ok(game_bytes) => {
                     let game: GameJson =
                         serde_json::from_slice(&game_bytes).expect("Failed to serialize GameJson");
-
+                    println!("{}", serde_json::to_string_pretty(&game).unwrap());
                     let game_info =
                         generate_game_info_struct(&game, &game_idx, &request_data.username);
                     games_info.push(game_info);

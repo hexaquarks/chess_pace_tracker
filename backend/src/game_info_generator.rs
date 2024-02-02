@@ -1,4 +1,5 @@
-use crate::deserialization::GameJson;
+use crate::deserialization::*;
+use crate::unit_test_util::create_mock_game_json;
 
 #[derive(Clone)]
 pub struct TimedMove {
@@ -12,7 +13,7 @@ pub struct GameInfo {
     pub user_color: String,
     pub user_rating: i32,
     pub opponent_rating: i32,
-    pub winner_color: String,
+    pub winner_color: Option<String>,
 }
 
 pub fn generate_timed_moves(game: &GameJson) -> Vec<TimedMove> {
@@ -100,6 +101,26 @@ pub fn get_user_rating(game: &GameJson, user_color: &str) -> i32 {
     player_detail.as_ref().unwrap().rating.unwrap_or(0)
 }
 
-pub fn get_winner_color(game: &GameJson) -> String {
-    game.winner.as_ref().unwrap().clone()
+pub fn get_winner_color(game: &GameJson) -> Option<String> {
+    match game.winner {
+        Some(_) => Some(game.winner.as_ref().unwrap().clone()),
+        None => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_generate_timed_moves() {
+        let game_json = create_mock_game_json();
+        let timed_moves = generate_timed_moves(&game_json);
+
+        assert_eq!(timed_moves.len(), 3); // Expect 3 moves
+        assert_eq!(timed_moves[0].move_key, "e2e4");
+        assert_eq!(timed_moves[0].move_time, 300);
+        assert_eq!(timed_moves[1].move_key, "e7e5");
+        assert_eq!(timed_moves[2].move_key, "g1f3");
+    }
 }
