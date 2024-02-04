@@ -204,15 +204,16 @@ mod tests {
 
     #[test]
     fn test_process_average_time() {
+        // Average for 2 games (one even one odd)
         {
             let game_a = get_some_mocked_game_a();
             let game_b = get_some_mocked_game_b();
-            let test_info = vec![
+            let input_games = vec![
                 generate_game_info_struct(&game_a, &0, &"user".to_string()),
                 generate_game_info_struct(&game_b, &1, &"user".to_string()),
             ];
 
-            let res = process_average_time(&test_info, &mut HashMap::new(), true);
+            let res = process_average_time(&input_games, &mut HashMap::new(), true);
             assert_eq!(res.is_some(), true);
 
             let expected_average = (578 + 8) / 2;
@@ -220,6 +221,34 @@ mod tests {
                 res.unwrap(),
                 convert_centiseconds_to_seconds(expected_average)
             );
+        }
+
+        // Average for 0 games
+        {
+            let input_games: Vec<GameInfo> = Vec::new();
+            let res = process_average_time(&input_games, &mut HashMap::new(), true);
+
+            assert_eq!(res.is_none(), true);
+        }
+
+        // 2 game and second game skipped
+        {
+            let game_a = get_some_mocked_game_a();
+            let game_b = get_some_mocked_game_b();
+            let input_games = vec![
+                generate_game_info_struct(&game_a, &0, &"user".to_string()),
+                generate_game_info_struct(&game_b, &1, &"user".to_string()),
+            ];
+
+            let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
+            skipped_games
+                .entry(1)
+                .or_insert(GameFetchWarning::InternalErrorOccuredWhileProcessingAGame);
+
+            let res = process_average_time(&input_games, &mut skipped_games, true);
+
+            assert_eq!(res.is_some(), true);
+            assert_eq!(res.unwrap(), convert_centiseconds_to_seconds(8));
         }
     }
 }
