@@ -15,7 +15,7 @@ const WinRateDonutChart: React.FC<WinRateDonutChartProps> = ({ winRate }) => {
             chart: {
                 type: 'donut',
                 toolbar: {
-                    show: false 
+                    show: false
                 }
             },
             colors: ['#10B981', '#EF4444'],
@@ -23,10 +23,10 @@ const WinRateDonutChart: React.FC<WinRateDonutChartProps> = ({ winRate }) => {
             stroke: {
                 colors: ["transparent"],
                 lineCap: undefined,
-              },
-              dataLabels: {
+            },
+            dataLabels: {
                 enabled: false
-              },
+            },
             legend: {
                 show: true,
                 showForSingleSeries: true,
@@ -59,7 +59,7 @@ const WinRateDonutChart: React.FC<WinRateDonutChartProps> = ({ winRate }) => {
                                 fontFamily: "Inter, sans-serif",
                                 color: 'red',
                                 formatter: function (w: any) {
-                                    return w.globals.series[0] + "%"
+                                    return w.globals.series[0].toFixed(0) + "%"
                                 },
                             },
                             value: {
@@ -91,9 +91,9 @@ const WinRateDonutChart: React.FC<WinRateDonutChartProps> = ({ winRate }) => {
         const chart = new ApexCharts(document.querySelector("#win-rate-chart"), options);
         chart.render();
 
-    return () => {
-        chart.destroy();
-    };
+        return () => {
+            chart.destroy();
+        };
     }, [winRate]);
 
     return (
