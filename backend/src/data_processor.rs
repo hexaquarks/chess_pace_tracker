@@ -1,9 +1,10 @@
 use crate::api::GameFetchWarning;
-use crate::game_info_generator::{GameInfo, TimedMove};
+use crate::game_info_generator::{generate_game_info_struct, GameInfo, TimedMove};
+use crate::unit_test_util::*;
 use crate::util;
 use std::collections::HashMap;
 
-const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 5;
+const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 7;
 
 fn is_game_draw(game: &GameInfo) -> bool {
     game.winner_color.is_none()
@@ -61,6 +62,7 @@ pub fn compute_curr_game_time_differential(game: &GameInfo) -> i32 {
 pub fn process_average_time(
     games: &[GameInfo],
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
+    is_testing: bool,
 ) -> Option<f32> {
     let mut half_time_differentials = Vec::new();
     for (i, game_info) in games.iter().enumerate() {
@@ -69,7 +71,8 @@ pub fn process_average_time(
             // Skip it from the computation.
             continue;
         }
-        if game_info.timed_moves.len() < MIN_NUMBER_OF_MOVES_IN_GAME {
+        if !is_testing && game_info.timed_moves.len() < MIN_NUMBER_OF_MOVES_IN_GAME {
+            // Consider this block only in release.
             // skip this game and add it to vector of warnings with warning
             skipped_games
                 .entry(i)
@@ -121,6 +124,8 @@ pub fn process_win_rate(
 
 #[cfg(test)]
 mod tests {
+    use crate::util::convert_centiseconds_to_seconds;
+
     use super::*;
 
     fn make_move_sequence_test(n_moves: usize) -> Vec<TimedMove> {
@@ -194,6 +199,27 @@ mod tests {
 
             assert_eq!(half_move.0.move_key, "B");
             assert_eq!(half_move.1.move_key, "C");
+        }
+    }
+
+    #[test]
+    fn test_process_average_time() {
+        {
+            let game_a = get_some_mocked_game_a();
+            let game_b = get_some_mocked_game_b();
+            let test_info = vec![
+                generate_game_info_struct(&game_a, &0, &"user".to_string()),
+                generate_game_info_struct(&game_b, &1, &"user".to_string()),
+            ];
+
+            let res = process_average_time(&test_info, &mut HashMap::new(), true);
+            assert_eq!(res.is_some(), true);
+
+            let expected_average = (578 + 8) / 2;
+            assert_eq!(
+                res.unwrap(),
+                convert_centiseconds_to_seconds(expected_average)
+            );
         }
     }
 }

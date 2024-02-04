@@ -88,7 +88,8 @@ pub async fn fetch_lichess_player_data(
         get_games_info_from_response_stream(request_data, request_response, &mut skipped_games)
             .await;
 
-    let average_half_time_differential = process_average_time(&games_info, &mut skipped_games);
+    let average_half_time_differential =
+        process_average_time(&games_info, &mut skipped_games, false);
     let player_win_rate_in_fetched_games = process_win_rate(&games_info, &skipped_games);
 
     // For UI testing purposes:

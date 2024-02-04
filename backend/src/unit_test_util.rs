@@ -9,17 +9,26 @@ pub struct MinimalGameJsonInfoTesting {
     pub winner: Option<String>,
 }
 
-pub fn get_some_game_for_mock() -> MinimalGameJsonInfoTesting {
-    MinimalGameJsonInfoTesting {
+pub fn get_some_mocked_game_a() -> GameJson {
+    create_mock_game_json(MinimalGameJsonInfoTesting {
         clocks: Some(vec![18003, 18003, 17939, 17931, 17899, 17867]),
         moves: Some("e4 c5 Nf3 d6 d4 cxd4".to_string()),
         black_player_name: Some("user".to_string()),
         white_player_name: Some("other_user".to_string()),
         winner: Some("white".to_string()),
-    }
-}
+    })
+} // time diff : (17939 - 17931 = 8)
 
-// This function is now correctly placed within the test module.
+pub fn get_some_mocked_game_b() -> GameJson {
+    create_mock_game_json(MinimalGameJsonInfoTesting {
+        clocks: Some(vec![18003, 18003, 17509, 16931, 17201, 16000, 17000]),
+        moves: Some("e4 c5 Nf3 d6 d4 cxd4".to_string()),
+        black_player_name: Some("other_user".to_string()),
+        white_player_name: Some("user".to_string()),
+        winner: Some("black".to_string()),
+    })
+} // time diff : (17509 - 16931 = 578)
+
 pub fn create_mock_game_json(mut info: MinimalGameJsonInfoTesting) -> GameJson {
     GameJson {
         clock: Some(Clock {
