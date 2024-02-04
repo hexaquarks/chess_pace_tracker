@@ -1,5 +1,5 @@
 use crate::deserialization::*;
-use crate::unit_test_util::create_mock_game_json;
+use crate::unit_test_util::*;
 
 #[derive(Clone)]
 pub struct TimedMove {
@@ -114,13 +114,15 @@ mod tests {
 
     #[test]
     fn test_generate_timed_moves() {
-        let game_json = create_mock_game_json();
+        let mut test_info = get_some_game_for_mock();
+
+        let game_json = create_mock_game_json(test_info);
         let timed_moves = generate_timed_moves(&game_json);
 
-        assert_eq!(timed_moves.len(), 3); // Expect 3 moves
-        assert_eq!(timed_moves[0].move_key, "e2e4");
-        assert_eq!(timed_moves[0].move_time, 300);
-        assert_eq!(timed_moves[1].move_key, "e7e5");
-        assert_eq!(timed_moves[2].move_key, "g1f3");
+        assert_eq!(timed_moves.len(), 6);
+        assert_eq!(timed_moves[0].move_key, "e4");
+        assert_eq!(timed_moves[0].move_time, 18003);
+        assert_eq!(timed_moves[1].move_key, "c5");
+        assert_eq!(timed_moves[3].move_time, 17931);
     }
 }

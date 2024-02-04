@@ -16,21 +16,29 @@ fn has_user_won_game(game: &GameInfo) -> bool {
     false
 }
 
+/// Heuristics:
+/// Check unit tests at bottom of file
 fn get_half_moves(
     timed_moves: &[TimedMove],
-    middle_cut_idx: usize,
-    is_n_moves_even: bool,
-    is_user_the_first_to_move: bool,
+    midpoint: usize,
+    is_moves_even: bool,
+    is_user_first_mover: bool,
 ) -> (TimedMove, TimedMove) {
-    let offset = if is_n_moves_even == is_user_the_first_to_move {
-        0
+    let (user_index, opponent_index) = if is_moves_even {
+        (midpoint - 1, midpoint)
     } else {
-        1
+        (midpoint, midpoint - 1)
     };
-    let user_half_move = timed_moves[middle_cut_idx + offset].clone();
-    let opponent_half_move = timed_moves[middle_cut_idx + 1 - offset].clone();
 
-    (user_half_move, opponent_half_move)
+    let user_move = timed_moves[user_index].clone();
+    let opponent_move = timed_moves[opponent_index].clone();
+
+    // Standardize order of return user first and opponent second.
+    if (is_user_first_mover && is_moves_even) || (!is_user_first_mover && !is_moves_even) {
+        (opponent_move, user_move)
+    } else {
+        (user_move, opponent_move)
+    }
 }
 
 pub fn compute_curr_game_time_differential(game: &GameInfo) -> i32 {
@@ -109,4 +117,83 @@ pub fn process_win_rate(
     }
 
     n_wins as f32 / n_games_considered as f32
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_move_sequence_test(n_moves: usize) -> Vec<TimedMove> {
+        let mut result = Vec::new();
+        for i in 0..n_moves {
+            let character = (b'A' + i as u8 % 26) as char;
+            let number = i + 1;
+            result.push(TimedMove {
+                move_key: character.to_string(),
+                move_time: number as i64,
+            });
+        }
+        result
+    }
+
+    #[test]
+    fn test_get_half_moves() {
+        // A B C D
+        // even moves, user goes first
+        {
+            let even_number_of_moves_user_first = make_move_sequence_test(4);
+            let half_move = get_half_moves(
+                &even_number_of_moves_user_first,
+                even_number_of_moves_user_first.len() / 2,
+                true,
+                true,
+            );
+
+            assert_eq!(half_move.0.move_key, "C");
+            assert_eq!(half_move.1.move_key, "B");
+        }
+
+        // even moves, opponent goes first
+        {
+            let even_number_of_moves_opponent_first = make_move_sequence_test(4);
+            let half_move = get_half_moves(
+                &even_number_of_moves_opponent_first,
+                even_number_of_moves_opponent_first.len() / 2,
+                true,
+                false,
+            );
+
+            assert_eq!(half_move.0.move_key, "B");
+            assert_eq!(half_move.1.move_key, "C");
+        }
+
+        // A B C D E
+        // odd moves, user goes first
+        {
+            let odd_number_of_moves_user_first = make_move_sequence_test(4);
+            let half_move = get_half_moves(
+                &odd_number_of_moves_user_first,
+                odd_number_of_moves_user_first.len() / 2,
+                false,
+                true,
+            );
+
+            assert_eq!(half_move.0.move_key, "C");
+            assert_eq!(half_move.1.move_key, "B");
+        }
+
+        // odd moves, opponent goes first
+        {
+            let odd_number_of_moves_opponent_first = make_move_sequence_test(4);
+            let half_move = get_half_moves(
+                &odd_number_of_moves_opponent_first,
+                odd_number_of_moves_opponent_first.len() / 2,
+                false,
+                false,
+            );
+
+            assert_eq!(half_move.0.move_key, "B");
+            assert_eq!(half_move.1.move_key, "C");
+        }
+    }
 }
