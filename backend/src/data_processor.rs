@@ -216,7 +216,7 @@ mod tests {
             let res = process_average_time(&input_games, &mut HashMap::new(), true);
             assert_eq!(res.is_some(), true);
 
-            let expected_average = (578 + 8) / 2;
+            let expected_average = (578 as f32 + 8 as f32) / 2 as f32;
             assert_eq!(
                 res.unwrap(),
                 convert_centiseconds_to_seconds(expected_average)
@@ -248,7 +248,7 @@ mod tests {
             let res = process_average_time(&input_games, &mut skipped_games, true);
 
             assert_eq!(res.is_some(), true);
-            assert_eq!(res.unwrap(), convert_centiseconds_to_seconds(8));
+            assert_eq!(res.unwrap(), convert_centiseconds_to_seconds(8 as f32));
         }
     }
 }
