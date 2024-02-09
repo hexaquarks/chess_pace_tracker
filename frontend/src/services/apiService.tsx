@@ -11,10 +11,17 @@ export enum MessageInformationAssessment {
   Negative
 }
 
+export interface TrendChartDatum {
+  time_differential: number,
+  win_status: string,
+  game_number: number
+}
+
 export interface ResponseInformation {
   time: number; 
   explanation_message: [string, MessageInformationAssessment]
   games_with_errors: Array<[number, string]>
+  trend_chart_data: [TrendChartDatum]
   player_win_rate_in_fetched_games: number
 }
 

@@ -8,6 +8,7 @@ import { sendDataToBackend, ResponseInformation, MessageInformationAssessment } 
 import ResponsePanel from './components/ResponsePanel';
 import ErrorsPanel from './components/ErrorsPanel';
 import WinRateDonutChart from './components/WinRateDonutChart';
+import { DataSeriesChart, convertTrendChartData } from './components/DataSeriesChart';
 
 function App() {
   const [username, setUsername] = useState<string>('physicskush');
@@ -34,14 +35,22 @@ function App() {
             <SendDataButton onClick={handleSendData} />
           </div>
 
-          {response && (
-            <div className="bg-gray-800 p-6 rounded-lg shadow-md">
-              <ResponsePanel
-                time={response.time}
-                explanationMessage={response.explanation_message}
-              />
-            </div>
-          )}
+          {
+            response && (
+              <div>
+                <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+                  <ResponsePanel
+                    time={response.time}
+                    explanationMessage={response.explanation_message}
+                  />
+                </div>
+                <div>
+                  <DataSeriesChart {...convertTrendChartData(response.trend_chart_data)} />
+                </div>
+              </div>
+            )
+          }
+
         </div>
 
         {response && (
