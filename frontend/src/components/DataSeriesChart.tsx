@@ -33,7 +33,7 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
                 }
             ],
             chart: {
-                height: "100%",
+                height: 300,
                 type: "area",
                 fontFamily: "Inter, sans-serif",
                 dropShadow: {
@@ -62,8 +62,23 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
                 },
             },
             dataLabels: {
-                enabled: false,
-            },
+                style: {
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                },
+                background: {
+                  enabled: true,
+                  foreColor: '#fff',
+                  borderRadius: 2,
+                  padding: 4,
+                  opacity: 0.9,
+                  borderWidth: 1,
+                  borderColor: 'black'
+                },
+                formatter: function (value: number) {
+                    return (value > 0.0 ? '+' + value : value)+ 's';
+                }
+              },
             stroke: {
                 width: 6,
             },
