@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import ApexCharts from 'apexcharts';
-import { ResponseInformation, TrendChartDatum } from '../services/apiService';
+import { TrendChartDatum } from '../services/apiService';
 
 interface DataSeriesChartProps {
     times: number[],
@@ -118,7 +118,7 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
                   show: false,
                 },
                 tooltip: {
-                  enabled: false, // Disable tooltip for x-axis
+                  enabled: false, 
                 },
                 crosshairs: {
                     show: false
