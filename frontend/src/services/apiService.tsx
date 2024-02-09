@@ -16,6 +16,7 @@ export interface ResponseInformation {
   explanation_message: [string, MessageInformationAssessment]
   games_with_errors: Array<[number, string]>
   player_win_rate_in_fetched_games: number
+  trend_chart_data: Array<[number, string, number]>
 }
 
 export const sendDataToBackend = async (

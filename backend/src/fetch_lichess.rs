@@ -105,5 +105,6 @@ pub async fn fetch_lichess_player_data(
         get_explanation_message(average_half_time_differential),
         skipped_games,
         get_win_ratio_string_fmt(player_win_rate_in_fetched_games),
+        trend_chart_data,
     ))
 }

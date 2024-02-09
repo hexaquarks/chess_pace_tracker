@@ -1,10 +1,13 @@
 use crate::api::GameFetchWarning;
 use crate::game_info_generator::GameInfo;
 use crate::util;
+
+use serde::Serialize;
 use std::collections::HashMap;
 
+#[derive(Serialize, Debug, PartialEq)]
 pub struct TrendChartDatum {
-    pub time_differential: i32,
+    pub time_differential: f32,
     pub win_status: String,
     pub game_number: i32,
 }
@@ -12,7 +15,7 @@ pub struct TrendChartDatum {
 pub fn process_trend_chart_data(
     games: &[GameInfo],
     skipped_games: &HashMap<usize, GameFetchWarning>,
-    half_time_differentials: Vec<i32>,
+    half_time_differentials: Vec<f32>,
 ) -> Vec<TrendChartDatum> {
     let mut trend_chart_data: Vec<TrendChartDatum> = Vec::new();
     let mut game_number_counter: usize = 1;

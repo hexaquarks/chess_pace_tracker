@@ -52,7 +52,7 @@ pub fn get_half_time_differentials(
     games: &[GameInfo],
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
     is_testing: bool,
-) -> Vec<i32> {
+) -> Vec<f32> {
     let mut half_time_differentials = Vec::new();
     for (i, game_info) in games.iter().enumerate() {
         if skipped_games.contains_key(&i) {
@@ -70,21 +70,21 @@ pub fn get_half_time_differentials(
         }
 
         let curr_game_time_differential = compute_curr_game_time_differential(game_info);
-        half_time_differentials.push(curr_game_time_differential);
+        half_time_differentials.push(util::convert_centiseconds_to_seconds(
+            curr_game_time_differential,
+        ));
     }
     half_time_differentials
 }
 
-pub fn process_average_time(half_time_differentials: &Vec<i32>) -> Option<f32> {
+pub fn process_average_time(half_time_differentials: &Vec<f32>) -> Option<f32> {
     if half_time_differentials.len() == 0 {
         // NO games were kept in the computation. The time average is undefined
         return None;
     }
 
     let average_half_time_differentials = util::compute_average(&half_time_differentials);
-    Some(util::convert_centiseconds_to_seconds(
-        average_half_time_differentials,
-    ))
+    Some(average_half_time_differentials)
 }
 
 pub fn process_win_rate(
@@ -209,11 +209,8 @@ mod tests {
             let res = process_average_time(&half_time_differentials);
             assert_eq!(res.is_some(), true);
 
-            let expected_average = (578 as f32 + 8 as f32) / 2 as f32;
-            assert_eq!(
-                res.unwrap(),
-                convert_centiseconds_to_seconds(expected_average)
-            );
+            let expected_average = (5.78 + 0.08) / 2.0;
+            assert_eq!(res.unwrap(), expected_average as f32);
         }
 
         // Average for 0 games
@@ -245,7 +242,7 @@ mod tests {
             let res = process_average_time(&half_time_differentials);
 
             assert_eq!(res.is_some(), true);
-            assert_eq!(res.unwrap(), convert_centiseconds_to_seconds(8 as f32));
+            assert_eq!(res.unwrap(), convert_centiseconds_to_seconds(8));
         }
     }
 }
