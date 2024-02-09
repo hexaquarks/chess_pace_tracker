@@ -1,10 +1,11 @@
 use crate::api::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
-use crate::data_processor::{process_average_time, process_win_rate};
+use crate::data_processor::{get_half_time_differentials, process_average_time, process_win_rate};
 use crate::deserialization::GameJson;
 use crate::game_info_generator::{generate_game_info_struct, GameInfo};
 use crate::message_generator::{
     get_average_time_string_fmt, get_explanation_message, get_win_ratio_string_fmt,
 };
+use crate::trend_chart_generator::process_trend_chart_data;
 use crate::util::generate_dummy_erros_testing;
 use actix_web::Error;
 use futures_util::StreamExt;
@@ -88,9 +89,12 @@ pub async fn fetch_lichess_player_data(
         get_games_info_from_response_stream(request_data, request_response, &mut skipped_games)
             .await;
 
-    let average_half_time_differential =
-        process_average_time(&games_info, &mut skipped_games, false);
+    let half_time_differentials =
+        get_half_time_differentials(&games_info, &mut skipped_games, false);
+    let average_half_time_differential = process_average_time(&half_time_differentials);
     let player_win_rate_in_fetched_games = process_win_rate(&games_info, &skipped_games);
+    let trend_chart_data =
+        process_trend_chart_data(&games_info, &skipped_games, half_time_differentials);
 
     // For UI testing purposes:
     //    Adding a bunch of games with error message for errors side panel

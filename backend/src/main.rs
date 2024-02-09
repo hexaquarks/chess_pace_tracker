@@ -7,6 +7,7 @@ mod deserialization;
 mod fetch_lichess;
 mod game_info_generator;
 mod message_generator;
+mod trend_chart_generator;
 mod unit_test_util;
 mod util;
 

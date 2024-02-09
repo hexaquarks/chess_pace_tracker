@@ -6,17 +6,6 @@ use std::collections::HashMap;
 
 const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 7;
 
-fn is_game_draw(game: &GameInfo) -> bool {
-    game.winner_color.is_none()
-}
-
-fn has_user_won_game(game: &GameInfo) -> bool {
-    if game.winner_color.is_some() {
-        return game.user_color == *game.winner_color.as_ref().unwrap();
-    }
-    false
-}
-
 /// Heuristics:
 /// Check unit tests at bottom of file
 fn get_half_moves(
@@ -59,11 +48,11 @@ pub fn compute_curr_game_time_differential(game: &GameInfo) -> i32 {
     (user_half_move.move_time - opponent_half_move.move_time) as i32
 }
 
-pub fn process_average_time(
+pub fn get_half_time_differentials(
     games: &[GameInfo],
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
     is_testing: bool,
-) -> Option<f32> {
+) -> Vec<i32> {
     let mut half_time_differentials = Vec::new();
     for (i, game_info) in games.iter().enumerate() {
         if skipped_games.contains_key(&i) {
@@ -83,7 +72,10 @@ pub fn process_average_time(
         let curr_game_time_differential = compute_curr_game_time_differential(game_info);
         half_time_differentials.push(curr_game_time_differential);
     }
+    half_time_differentials
+}
 
+pub fn process_average_time(half_time_differentials: &Vec<i32>) -> Option<f32> {
     if half_time_differentials.len() == 0 {
         // NO games were kept in the computation. The time average is undefined
         return None;
@@ -103,14 +95,14 @@ pub fn process_win_rate(
     let mut n_wins = 0;
 
     for (i, game_info) in games.iter().enumerate() {
-        if skipped_games.contains_key(&i) || is_game_draw(game_info) {
+        if skipped_games.contains_key(&i) || util::is_game_draw(game_info) {
             // The current game has already an internal error.
             // Skip it from the computation.
             n_games_considered -= 1;
             continue;
         }
 
-        if has_user_won_game(game_info) {
+        if util::has_user_won_game(game_info) {
             n_wins += 1;
         }
     }
@@ -212,8 +204,9 @@ mod tests {
                 generate_game_info_struct(&game_a, &0, &"user".to_string()),
                 generate_game_info_struct(&game_b, &1, &"user".to_string()),
             ];
-
-            let res = process_average_time(&input_games, &mut HashMap::new(), true);
+            let half_time_differentials =
+                get_half_time_differentials(&input_games, &mut HashMap::new(), true);
+            let res = process_average_time(&half_time_differentials);
             assert_eq!(res.is_some(), true);
 
             let expected_average = (578 as f32 + 8 as f32) / 2 as f32;
@@ -226,7 +219,9 @@ mod tests {
         // Average for 0 games
         {
             let input_games: Vec<GameInfo> = Vec::new();
-            let res = process_average_time(&input_games, &mut HashMap::new(), true);
+            let half_time_differentials =
+                get_half_time_differentials(&input_games, &mut HashMap::new(), true);
+            let res = process_average_time(&half_time_differentials);
 
             assert_eq!(res.is_none(), true);
         }
@@ -245,7 +240,9 @@ mod tests {
                 .entry(1)
                 .or_insert(GameFetchWarning::InternalErrorOccuredWhileProcessingAGame);
 
-            let res = process_average_time(&input_games, &mut skipped_games, true);
+            let half_time_differentials =
+                get_half_time_differentials(&input_games, &mut skipped_games, true);
+            let res = process_average_time(&half_time_differentials);
 
             assert_eq!(res.is_some(), true);
             assert_eq!(res.unwrap(), convert_centiseconds_to_seconds(8 as f32));
