@@ -23,6 +23,27 @@ export const convertTrendChartData = (data: [TrendChartDatum]): DataSeriesChartP
 };
 
 export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStatus, gameNumbers }) => {
+
+    const tooltipFormatter = ({ series, seriesIndex, dataPointIndex, w }: any) => {
+        const value = series[seriesIndex][dataPointIndex];
+        const status = winStatus[dataPointIndex];
+        const gameNumber = gameNumbers[dataPointIndex];
+    
+        return (
+          '<div class="arrow_box" style="padding: 10px; text-align: center;">' +
+          '<span style="font-size: 16px; font-weight: bold;">' + signedTimeFormatter(value) + '</span>' +
+          '<br>' + 
+          '<span>' + status + '</span>' +
+          '<br>' +
+          '<span>' + 'Game ' + gameNumber + '</span>' +
+          '</div>'
+        );
+    }
+
+    const signedTimeFormatter = (time: number) => { 
+        return (time > 0.0 ? '+' + time : time)+ 's'
+    }
+
     useEffect(() => {
         let options: ApexCharts.ApexOptions = {
             series: [
@@ -44,11 +65,8 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
                 },
             },
             tooltip: {
-                enabled: true,
-                x: {
-                    show: false,
-                },
-            },
+                custom: tooltipFormatter
+              },
             legend: {
                 show: false
             },
@@ -75,9 +93,7 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
                   borderWidth: 1,
                   borderColor: 'black'
                 },
-                formatter: function (value: number) {
-                    return (value > 0.0 ? '+' + value : value)+ 's';
-                }
+                formatter: signedTimeFormatter
               },
             stroke: {
                 width: 6,
@@ -92,17 +108,22 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
                 },
             },
             xaxis: {
-                categories: winStatus,
                 labels: {
-                    show: false,
+                  show: false,
                 },
                 axisBorder: {
-                    show: false,
+                  show: false,
                 },
                 axisTicks: {
-                    show: false,
+                  show: false,
                 },
-            },
+                tooltip: {
+                  enabled: false, // Disable tooltip for x-axis
+                },
+                crosshairs: {
+                    show: false
+                  }
+              },
             yaxis: {
                 show: false,
                 labels: {
