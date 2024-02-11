@@ -1,19 +1,20 @@
-use crate::api::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
+use std::collections::HashMap;
+use std::sync::Arc;
+
 use crate::deserialization::GameJson;
 use crate::games_info_generator::{self, GameInfo};
 use crate::games_info_processor::{
     get_half_time_differentials, process_average_time, process_win_rate,
 };
 use crate::insight_generator::{self, InsightsPanelProps};
-use crate::trend_chart_generator::process_trend_chart_data;
-use crate::util::generate_dummy_erros_testing;
+use crate::service_intermediary::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
+use crate::trend_chart_generator;
+use crate::util;
 
-use actix_web::{Error, HttpResponse};
-use futures_util::{StreamExt, TryStreamExt};
+use actix_web::HttpResponse;
+use futures_util::TryStreamExt;
 use reqwest::Response;
-use serde_json::{self};
-use std::collections::HashMap;
-use std::sync::Arc;
+use serde_json;
 use tokio::sync::Mutex;
 
 pub fn get_url(request_data: &ChessDataRequest) -> String {
@@ -84,12 +85,15 @@ pub async fn handle_successful_response(
                 get_half_time_differentials(&games_info, &mut skipped_games, false);
             let average_time = process_average_time(&half_time_differentials);
             let win_rate = process_win_rate(&games_info, &skipped_games);
-            let trend_chart_data =
-                process_trend_chart_data(&games_info, &skipped_games, half_time_differentials);
+            let trend_chart_data = trend_chart_generator::generate(
+                &games_info,
+                &skipped_games,
+                half_time_differentials,
+            );
 
             // For UI testing purposes:
             //    Adding a bunch of games with error message for errors side panel
-            generate_dummy_erros_testing(&mut skipped_games);
+            util::generate_dummy_erros_testing(&mut skipped_games);
 
             let insights: InsightsPanelProps =
                 insight_generator::get_insights(average_time, win_rate);
@@ -110,7 +114,7 @@ pub fn handle_unsuccessful_response() -> HttpResponse {
     HttpResponse::InternalServerError().body("Lichess API returned non-success status")
 }
 
-pub async fn fetch_lichess_player_data(request_data: ChessDataRequest) -> HttpResponse {
+pub async fn fetch_player_data(request_data: ChessDataRequest) -> HttpResponse {
     let url = get_url(&request_data);
     let client = reqwest::Client::new();
 

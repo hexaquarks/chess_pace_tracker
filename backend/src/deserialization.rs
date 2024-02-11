@@ -1,6 +1,8 @@
-use crate::api::GameFetchWarning;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+use crate::service_intermediary::GameFetchWarning;
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GameJson {
@@ -14,7 +16,7 @@ pub struct GameJson {
     pub players: Option<Players>,
     pub rated: Option<bool>,
     pub speed: Option<String>,
-    pub status: Option<String>,
+    pub status: Option<String>, // draw, mate, resign
     pub variant: Option<String>,
     pub winner: Option<String>,
     #[serde(flatten)]

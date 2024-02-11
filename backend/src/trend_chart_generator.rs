@@ -1,5 +1,5 @@
-use crate::api::GameFetchWarning;
 use crate::games_info_generator::GameInfo;
+use crate::service_intermediary::GameFetchWarning;
 use crate::util;
 
 use serde::Serialize;
@@ -12,7 +12,7 @@ pub struct TrendChartDatum {
     pub game_number: i32,
 }
 
-pub fn process_trend_chart_data(
+pub fn generate(
     games: &[GameInfo],
     skipped_games: &HashMap<usize, GameFetchWarning>,
     half_time_differentials: Vec<f32>,

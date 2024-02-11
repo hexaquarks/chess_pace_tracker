@@ -1,5 +1,6 @@
-use crate::deserialization::*;
 use std::collections::HashMap;
+
+use crate::deserialization::*;
 
 pub struct MinimalGameJsonInfoTesting {
     pub clocks: Option<Vec<i64>>,

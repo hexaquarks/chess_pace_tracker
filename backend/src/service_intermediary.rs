@@ -1,11 +1,12 @@
-use crate::deserialization::convert_games_with_errors_to_displayable_format;
-use crate::lichess_client::fetch_lichess_player_data;
+use std::collections::HashMap;
+
+use crate::deserialization;
+use crate::lichess_client;
 use crate::trend_chart_generator::TrendChartDatum;
 
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, Responder};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::collections::HashMap;
 
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug)]
 #[repr(i32)]
@@ -52,7 +53,8 @@ impl ChessDataResponse {
         player_win_rate_in_fetched_games: String,
         trend_chart_data: Vec<TrendChartDatum>,
     ) -> Self {
-        let errors_vec = convert_games_with_errors_to_displayable_format(games_with_errors);
+        let errors_vec =
+            deserialization::convert_games_with_errors_to_displayable_format(games_with_errors);
 
         ChessDataResponse {
             time,
@@ -66,5 +68,5 @@ impl ChessDataResponse {
 
 #[post("/fetch-chess-data")]
 pub async fn fetch_chess_data(info: web::Json<ChessDataRequest>) -> impl Responder {
-    fetch_lichess_player_data(info.into_inner()).await
+    lichess_client::fetch_player_data(info.into_inner()).await
 }

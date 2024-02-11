@@ -1,6 +1,4 @@
-use std::fmt::Debug;
-
-use crate::api::DescriptionMessageAssessment;
+use crate::service_intermediary::DescriptionMessageAssessment;
 
 const INVALID_TIME_DESCRIPTION_PLACEHOLDER_MSG: &str =
     "The time value was not computed. Check the errors panel for more information.";

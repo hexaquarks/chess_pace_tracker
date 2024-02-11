@@ -1,8 +1,9 @@
-use crate::api::GameFetchWarning;
+use std::collections::HashMap;
+
 use crate::games_info_generator::{self, GameInfo, TimedMove};
+use crate::service_intermediary::GameFetchWarning;
 use crate::unit_test_util;
 use crate::util;
-use std::collections::HashMap;
 
 const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 7;
 
