@@ -6,7 +6,6 @@ interface ErrorsPanelProps {
 }
 
 const ErrorsPanel: React.FC<ErrorsPanelProps> = ({ gamesWithError }) => {
-    console.log(gamesWithError);
     if (!gamesWithError || gamesWithError.length === 0) {
         return (
             <div className="flex flex-col items-center space-x-2 p-4 rounded-lg bg-gray-800 text-white w-full">
