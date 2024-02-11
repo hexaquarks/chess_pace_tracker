@@ -1,5 +1,5 @@
 use crate::deserialization::convert_games_with_errors_to_displayable_format;
-use crate::fetch_lichess::fetch_lichess_player_data;
+use crate::lichess_client::fetch_lichess_player_data;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -61,8 +61,5 @@ impl ChessDataResponse {
 
 #[post("/fetch-chess-data")]
 pub async fn fetch_chess_data(info: web::Json<ChessDataRequest>) -> impl Responder {
-    match fetch_lichess_player_data(info.into_inner()).await {
-        Ok(response) => HttpResponse::Ok().json(response),
-        Err(e) => HttpResponse::InternalServerError().json(e.to_string()),
-    }
+    fetch_lichess_player_data(info.into_inner()).await
 }

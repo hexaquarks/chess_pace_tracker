@@ -452,6 +452,7 @@ dependencies = [
  "futures",
  "futures-util",
  "lichess-api",
+ "log",
  "reqwest",
  "serde",
  "serde_json",

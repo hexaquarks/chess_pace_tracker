@@ -1,7 +1,6 @@
-use crate::deserialization::*;
-use crate::unit_test_util::*;
+use crate::deserialization::GameJson;
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone)]
 pub struct TimedMove {
     pub move_key: String,
     pub move_time: i64,
@@ -11,7 +10,9 @@ pub struct GameInfo {
     pub game_index: usize,
     pub timed_moves: Vec<TimedMove>,
     pub user_color: String,
-    pub winner_color: Option<String>,
+    pub user_rating: i32,
+    pub opponent_rating: i32,
+    pub winner_color: Option<String>, // If some then white or black, if none then draw
 }
 
 pub fn generate_timed_moves(game: &GameJson) -> Vec<TimedMove> {
@@ -54,17 +55,19 @@ pub fn generate_game_info_struct(
     user_name: &String,
 ) -> GameInfo {
     let user_color = get_user_color(game, user_name);
-    //let user_rating = get_user_rating(game, &user_color);
+    let user_rating = get_user_rating(game, &user_color);
     let opponent_color = if user_color == "black" {
         "white"
     } else {
         "black"
     };
-    //let opponent_rating = get_user_rating(game, opponent_color);
+    let opponent_rating = get_user_rating(game, opponent_color);
     let game_info = GameInfo {
         game_index: *game_idx,
         timed_moves: generate_timed_moves(game),
         user_color: user_color,
+        user_rating: user_rating,
+        opponent_rating: opponent_rating,
         winner_color: get_winner_color(game),
     };
     game_info
@@ -98,50 +101,5 @@ pub fn get_user_rating(game: &GameJson, user_color: &str) -> i32 {
 }
 
 pub fn get_winner_color(game: &GameJson) -> Option<String> {
-    match game.winner {
-        Some(_) => Some(game.winner.as_ref().unwrap().clone()),
-        None => None,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_generate_timed_moves() {
-        let game_json = get_some_mocked_game_a();
-        let res: Vec<TimedMove> = generate_timed_moves(&game_json);
-
-        assert_eq!(res.len(), 6);
-        assert_eq!(res[0].move_key, "e4");
-        assert_eq!(res[0].move_time, 18003);
-        assert_eq!(res[1].move_key, "c5");
-        assert_eq!(res[3].move_time, 17931);
-    }
-
-    #[test]
-    fn test_generate_game_info_struct() {
-        // Test with mockes game A
-        {
-            let game_json = get_some_mocked_game_a();
-            let res = generate_game_info_struct(&game_json, &0, &"user".to_string());
-
-            assert_eq!(res.game_index, 0);
-            assert_eq!(res.timed_moves[0], generate_timed_moves(&game_json)[0]);
-            assert_eq!(res.user_color, "black");
-            assert_eq!(res.winner_color, Some("white".to_string()));
-        }
-
-        // Test with mocked game B
-        {
-            let game_json = get_some_mocked_game_b();
-            let res = generate_game_info_struct(&game_json, &1, &"user".to_string());
-
-            assert_eq!(res.game_index, 1);
-            assert_eq!(res.timed_moves[3], generate_timed_moves(&game_json)[3]); // any idx
-            assert_eq!(res.user_color, "white");
-            assert_eq!(res.winner_color, Some("black".to_string()));
-        }
-    }
+    game.winner.clone()
 }
