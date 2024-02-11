@@ -1,4 +1,5 @@
 mod deserialization;
+mod errors_manager;
 mod games_info_generator;
 mod games_info_processor;
 mod insight_generator;

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::deserialization::GameJson;
+use crate::errors_manager::ProcessError;
 use crate::games_info_generator::{self, GameInfo};
 use crate::games_info_processor::{
     get_half_time_differentials, process_average_time, process_win_rate,
@@ -32,7 +33,7 @@ pub async fn process_response_stream(
     request_data: ChessDataRequest,
     request_response: Response,
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), ProcessError> {
     let games_info_arc = Arc::new(Mutex::new(games_info));
     let skipped_games_arc = Arc::new(Mutex::new(skipped_games));
     let mut game_idx = 0;
