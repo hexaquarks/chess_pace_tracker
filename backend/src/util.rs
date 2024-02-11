@@ -1,5 +1,5 @@
 use crate::api::GameFetchWarning;
-use crate::game_info_generator::GameInfo;
+use crate::games_info_generator::GameInfo;
 use std::collections::HashMap;
 
 pub fn compute_average(times: &[f32]) -> f32 {

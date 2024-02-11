@@ -2,9 +2,9 @@ use actix_cors::Cors;
 use actix_web::{http::header, App, HttpServer};
 
 mod api;
-mod data_processor;
 mod deserialization;
-mod game_info_generator;
+mod games_info_generator;
+mod games_info_processor;
 mod lichess_client;
 mod message_generator;
 mod trend_chart_generator;

@@ -1,5 +1,5 @@
 use crate::api::GameFetchWarning;
-use crate::game_info_generator::GameInfo;
+use crate::games_info_generator::GameInfo;
 use crate::util;
 
 use serde::Serialize;

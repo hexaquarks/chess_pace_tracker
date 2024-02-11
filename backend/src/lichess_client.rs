@@ -1,7 +1,9 @@
 use crate::api::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
-use crate::data_processor::{get_half_time_differentials, process_average_time, process_win_rate};
 use crate::deserialization::GameJson;
-use crate::game_info_generator::{generate_game_info_struct, GameInfo};
+use crate::games_info_generator::{self, GameInfo};
+use crate::games_info_processor::{
+    get_half_time_differentials, process_average_time, process_win_rate,
+};
 use crate::message_generator::{
     get_average_time_string_fmt, get_explanation_message, get_win_ratio_string_fmt,
 };
@@ -26,21 +28,7 @@ pub fn get_url(request_data: &ChessDataRequest) -> String {
     )
 }
 
-pub async fn send_request(request_data: &ChessDataRequest) -> Result<Response, Error> {
-    let client = reqwest::Client::new();
-
-    let res = client
-        .get(get_url(request_data))
-        .header("Accept", "application/x-ndjson")
-        .send()
-        .await
-        .map_err(|e| {
-            actix_web::error::ErrorInternalServerError(format!("Request failed: {:?}", e))
-        });
-    res
-}
-
-pub async fn process_response(
+pub async fn process_response_stream(
     games_info: &mut Vec<GameInfo>,
     request_data: ChessDataRequest,
     request_response: Response,
@@ -62,7 +50,7 @@ pub async fn process_response(
                 match serde_json::from_slice::<GameJson>(&game_bytes) {
                     Ok(game_json) => {
                         let mut lock = games_info_ref.lock().await;
-                        lock.push(generate_game_info_struct(
+                        lock.push(games_info_generator::generate(
                             &game_json,
                             &game_idx,
                             &username_ref,
@@ -89,9 +77,10 @@ pub async fn handle_successful_response(
     response: Response,
 ) -> HttpResponse {
     let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
-
     let mut games_info: Vec<GameInfo> = Vec::new();
-    match process_response(&mut games_info, request_data, response, &mut skipped_games).await {
+
+    match process_response_stream(&mut games_info, request_data, response, &mut skipped_games).await
+    {
         Ok(_) => {
             let half_time_differentials =
                 get_half_time_differentials(&games_info, &mut skipped_games, false);

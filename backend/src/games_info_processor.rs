@@ -1,6 +1,6 @@
 use crate::api::GameFetchWarning;
-use crate::game_info_generator::{generate_game_info_struct, GameInfo, TimedMove};
-use crate::unit_test_util::*;
+use crate::games_info_generator::{self, GameInfo, TimedMove};
+use crate::unit_test_util;
 use crate::util;
 use std::collections::HashMap;
 
@@ -198,11 +198,11 @@ mod tests {
     fn test_process_average_time() {
         // Average for 2 games (one even one odd)
         {
-            let game_a = get_some_mocked_game_a();
-            let game_b = get_some_mocked_game_b();
+            let game_a = unit_test_util::get_some_mocked_game_a();
+            let game_b = unit_test_util::get_some_mocked_game_b();
             let input_games = vec![
-                generate_game_info_struct(&game_a, &0, &"user".to_string()),
-                generate_game_info_struct(&game_b, &1, &"user".to_string()),
+                games_info_generator::generate(&game_a, &0, &"user".to_string()),
+                games_info_generator::generate(&game_b, &1, &"user".to_string()),
             ];
             let half_time_differentials =
                 get_half_time_differentials(&input_games, &mut HashMap::new(), true);
@@ -225,11 +225,11 @@ mod tests {
 
         // 2 game and second game skipped
         {
-            let game_a = get_some_mocked_game_a();
-            let game_b = get_some_mocked_game_b();
+            let game_a = unit_test_util::get_some_mocked_game_a();
+            let game_b = unit_test_util::get_some_mocked_game_b();
             let input_games = vec![
-                generate_game_info_struct(&game_a, &0, &"user".to_string()),
-                generate_game_info_struct(&game_b, &1, &"user".to_string()),
+                games_info_generator::generate(&game_a, &0, &"user".to_string()),
+                games_info_generator::generate(&game_b, &1, &"user".to_string()),
             ];
 
             let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();

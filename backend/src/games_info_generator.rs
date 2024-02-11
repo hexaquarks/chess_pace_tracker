@@ -49,30 +49,6 @@ pub fn generate_timed_moves(game: &GameJson) -> Vec<TimedMove> {
     timed_moves
 }
 
-pub fn generate_game_info_struct(
-    game: &GameJson,
-    game_idx: &usize,
-    user_name: &String,
-) -> GameInfo {
-    let user_color = get_user_color(game, user_name);
-    let user_rating = get_user_rating(game, &user_color);
-    let opponent_color = if user_color == "black" {
-        "white"
-    } else {
-        "black"
-    };
-    let opponent_rating = get_user_rating(game, opponent_color);
-    let game_info = GameInfo {
-        game_index: *game_idx,
-        timed_moves: generate_timed_moves(game),
-        user_color: user_color,
-        user_rating: user_rating,
-        opponent_rating: opponent_rating,
-        winner_color: get_winner_color(game),
-    };
-    game_info
-}
-
 pub fn get_user_color(game: &GameJson, user_name: &str) -> String {
     if let Some(players) = game.players.as_ref() {
         if let Some(black_player) = players.black.as_ref() {
@@ -102,4 +78,24 @@ pub fn get_user_rating(game: &GameJson, user_color: &str) -> i32 {
 
 pub fn get_winner_color(game: &GameJson) -> Option<String> {
     game.winner.clone()
+}
+
+pub fn generate(game: &GameJson, game_idx: &usize, user_name: &String) -> GameInfo {
+    let user_color = get_user_color(game, user_name);
+    let user_rating = get_user_rating(game, &user_color);
+    let opponent_color = if user_color == "black" {
+        "white"
+    } else {
+        "black"
+    };
+    let opponent_rating = get_user_rating(game, opponent_color);
+    let game_info = GameInfo {
+        game_index: *game_idx,
+        timed_moves: generate_timed_moves(game),
+        user_color: user_color,
+        user_rating: user_rating,
+        opponent_rating: opponent_rating,
+        winner_color: get_winner_color(game),
+    };
+    game_info
 }
