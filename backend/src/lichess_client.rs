@@ -4,9 +4,7 @@ use crate::games_info_generator::{self, GameInfo};
 use crate::games_info_processor::{
     get_half_time_differentials, process_average_time, process_win_rate,
 };
-use crate::message_generator::{
-    get_average_time_string_fmt, get_explanation_message, get_win_ratio_string_fmt,
-};
+use crate::insight_generator::{self, InsightsPanelProps};
 use crate::trend_chart_generator::process_trend_chart_data;
 use crate::util::generate_dummy_erros_testing;
 
@@ -93,11 +91,14 @@ pub async fn handle_successful_response(
             //    Adding a bunch of games with error message for errors side panel
             generate_dummy_erros_testing(&mut skipped_games);
 
+            let insights: InsightsPanelProps =
+                insight_generator::get_insights(average_time, win_rate);
+
             HttpResponse::Ok().json(ChessDataResponse::new(
-                get_average_time_string_fmt(average_time),
-                get_explanation_message(average_time),
+                insights.average_time,
+                insights.explanation_message,
                 skipped_games,
-                get_win_ratio_string_fmt(win_rate),
+                insights.win_ratio,
                 trend_chart_data,
             ))
         }
