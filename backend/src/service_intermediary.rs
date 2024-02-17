@@ -4,6 +4,7 @@ use crate::deserialization;
 use crate::lichess_client;
 use crate::trend_chart_generator::TrendChartDatum;
 
+use actix_web::ResponseError;
 use actix_web::{post, web, Responder};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -68,5 +69,8 @@ impl ChessDataResponse {
 
 #[post("/fetch-chess-data")]
 pub async fn fetch_chess_data(info: web::Json<ChessDataRequest>) -> impl Responder {
-    lichess_client::fetch_player_data(info.into_inner()).await
+    match lichess_client::fetch_player_data(info.into_inner()).await {
+        Ok(response) => response,
+        Err(e) => e.error_response(),
+    }
 }
