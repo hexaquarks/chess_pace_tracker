@@ -9,6 +9,8 @@ import ResponsePanel from './components/ResponsePanel';
 import ErrorsPanel from './components/ErrorsPanel';
 import WinRateDonutChart from './components/WinRateDonutChart';
 import { DataSeriesChart, convertTrendChartData } from './components/DataSeriesChart';
+import ToastAlertContainer from './components/ToastAlertContainer';
+import { ToastAlert, ToastAlertProps} from './components/ToastAlert';
 
 function App() {
   const [username, setUsername] = useState<string>('physicskush');
@@ -18,50 +20,69 @@ function App() {
 
   const [response, setResponse] = useState<ResponseInformation | null>(null);
 
+  const [toasts, setToasts] = useState<ToastAlertProps[]>([]);
+
+  const removeToast = (id: number) => {
+    setToasts((prevToasts: ToastAlertProps[]) => prevToasts.filter((toast) => toast.id !== id));
+  };
+
+  const addToast = (message: string ) => {
+    const newToast: ToastAlertProps = { id: Date.now(), message, removeToast };
+    setToasts((prevToasts: ToastAlertProps[] ) => [...prevToasts, newToast]);
+  };
+
+
   const handleSendData = async () => {
-    const responseData: ResponseInformation = await sendDataToBackend(username, gamesCount, gameMode, userColor);
-    setResponse(responseData);
+    try {
+      const responseData: ResponseInformation = await sendDataToBackend(username, gamesCount, gameMode, userColor);
+      setResponse(responseData);
+    } catch (error) {
+      addToast(error instanceof Error ? error.message : 'An unexpected error occurred');
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">
-      <div className="flex flex-row justify-center w-full max-w-7xl">
-        <div className="flex flex-col w-full max-w-2xl px-4">
-          <div className="bg-gray-800 p-7 rounded-lg shadow-md mb-8">
-            <UsernameInput value={username} onChange={setUsername} />
-            <GamesCountInput value={gamesCount} onChange={setGamesCount} max={50} />
-            <GameModeInput value={gameMode} onChange={setGameMode} />
-            <UserColorInput value={userColor} onChange={setUserColor} />
-            <SendDataButton onClick={handleSendData} />
-          </div>
+    <div>
+      <ToastAlertContainer toasts={toasts} removeToast={removeToast} />
+      <div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">
+        <div className="flex flex-row justify-center w-full max-w-7xl">
+          <div className="flex flex-col w-full max-w-2xl px-4">
+            <div className="bg-gray-800 p-7 rounded-lg shadow-md mb-8">
+              <UsernameInput value={username} onChange={setUsername} />
+              <GamesCountInput value={gamesCount} onChange={setGamesCount} max={50} />
+              <GameModeInput value={gameMode} onChange={setGameMode} />
+              <UserColorInput value={userColor} onChange={setUserColor} />
+              <SendDataButton onClick={handleSendData} />
+            </div>
 
-          {
-            response && (
-              <div>
-                <div className="bg-gray-800 p-6 rounded-lg shadow-md">
-                  <ResponsePanel
-                    time={response.time}
-                    explanationMessage={response.explanation_message}
-                  />
-                </div>
+            {
+              response && (
                 <div>
-                  <DataSeriesChart {...convertTrendChartData(response.trend_chart_data)} />
+                  <div className="bg-gray-800 p-6 rounded-lg shadow-md">
+                    <ResponsePanel
+                      time={response.time}
+                      explanationMessage={response.explanation_message}
+                    />
+                  </div>
+                  <div>
+                    <DataSeriesChart {...convertTrendChartData(response.trend_chart_data)} />
+                  </div>
                 </div>
-              </div>
-            )
-          }
-
-        </div>
-
-        {response && (
-          <div className="w-1/4 flex flex-col">
-            <ErrorsPanel
-              gamesWithError={response.games_with_errors}
-            />
-            <WinRateDonutChart winRate={response.player_win_rate_in_fetched_games} />
+              )
+            }
 
           </div>
-        )}
+
+          {response && (
+            <div className="w-1/4 flex flex-col">
+              <ErrorsPanel
+                gamesWithError={response.games_with_errors}
+              />
+              <WinRateDonutChart winRate={response.player_win_rate_in_fetched_games} />
+
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
