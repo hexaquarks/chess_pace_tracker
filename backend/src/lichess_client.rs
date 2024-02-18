@@ -20,7 +20,7 @@ use tokio::sync::Mutex;
 
 pub fn get_url(request_data: &ChessDataRequest) -> String {
     format!(
-        "https://lichess.org/api/games/user/{}?max={}&perfType={}&color={}&rated=true&clocks=true",
+        "https://lirg/api/games/user/{}?max={}&perfType={}&color={}&rated=true&clocks=true",
         request_data.username,
         request_data.games_count,
         request_data.game_mode,
