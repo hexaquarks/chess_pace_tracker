@@ -1,11 +1,17 @@
 use actix_web::{http::StatusCode, web::Json, HttpResponse, ResponseError};
 use serde::Serialize;
 
+const S_FETCH_ERROR_: &str =
+    "There was a problem fetching the data. Please check your internet connection.";
+const S_INTERNAL_ERROR_: &str =
+    "There was an internal problem with the server. Please try again later.";
+const S_DATA_ERROR_: &str = "There was a problem processing the data.";
+
 #[derive(Debug)]
 pub enum ProcessError {
     FetchError { message: String },
     DataError { message: String }, // Maybe unused given that I still want to output results
-    InternalError { message: String }, // Those will be hidden
+    InternalError { message: String },
 }
 
 #[derive(Serialize)]
@@ -32,9 +38,7 @@ impl ResponseError for ProcessError {
 impl From<reqwest::Error> for ProcessError {
     fn from(e: reqwest::Error) -> Self {
         ProcessError::FetchError {
-            message:
-                "There was a problem fetching the data. Please check your internet connection."
-                    .into(),
+            message: S_FETCH_ERROR_.into(),
         }
     }
 }
@@ -42,7 +46,7 @@ impl From<reqwest::Error> for ProcessError {
 impl From<serde_json::Error> for ProcessError {
     fn from(e: serde_json::Error) -> Self {
         ProcessError::DataError {
-            message: "There was a problem processing the data.".into(),
+            message: S_DATA_ERROR_.into(),
         }
     }
 }

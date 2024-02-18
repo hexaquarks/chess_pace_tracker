@@ -20,7 +20,7 @@ use tokio::sync::Mutex;
 
 pub fn get_url(request_data: &ChessDataRequest) -> String {
     format!(
-        "https://lichess.org/api/games/user/{}?max={}&perfType={}&color={}&rated=true&clocks=true",
+        "https://lics.or/api/{}?max={}&perfType={}&color={}&rated=true&clocks=true",
         request_data.username,
         request_data.games_count,
         request_data.game_mode,
@@ -116,16 +116,13 @@ pub async fn fetch_player_data(
         .header("Accept", "application/x-ndjson")
         .send()
         .await
-        .map_err(|_| ProcessError::FetchError {
-            message: "Failed to fetch data from Lichess API. Check your internet connection."
-                .into(),
-        })?;
+        .map_err(ProcessError::from)?;
 
     if response.status().is_success() {
         handle_successful_response(request_data, response).await
     } else {
         Err(ProcessError::FetchError {
-            message: "Lichess API returned non-success status".into(),
+            message: "There was a problem fetching the data".into(),
         })
     }
 }
