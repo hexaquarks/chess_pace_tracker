@@ -17,12 +17,21 @@ export interface TrendChartDatum {
   game_number: number
 }
 
+interface ResponseInformationInternal {
+  time: number; 
+  explanation_message: [string, MessageInformationAssessment]
+  games_with_errors: Array<[number, string]>
+  trend_chart_data: [TrendChartDatum]
+  player_win_rate_in_fetched_games: number
+}
+
 export interface ResponseInformation {
   time: number; 
   explanation_message: [string, MessageInformationAssessment]
   games_with_errors: Array<[number, string]>
   trend_chart_data: [TrendChartDatum]
   player_win_rate_in_fetched_games: number
+  unique_key: number
 }
 
 export const sendDataToBackend = async (
@@ -52,13 +61,15 @@ export const sendDataToBackend = async (
       throw new Error(errorResponse.error || `HTTP error! status: ${response.status}`);
     }
 
-    const data: ResponseInformation = await response.json();
+    const data: ResponseInformationInternal = await response.json();
     console.log(data);
     if (!data.games_with_errors) {
       console.log("its empt");
     }
+
+    const uniqueData: ResponseInformation = {...data, unique_key: Date.now() }
     
-    return data;
+    return uniqueData;
 
   } catch (error) {
     console.error('Error sending data to backend', error);

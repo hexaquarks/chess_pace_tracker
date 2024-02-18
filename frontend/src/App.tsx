@@ -10,16 +10,14 @@ import ErrorsPanel from './components/ErrorsPanel';
 import WinRateDonutChart from './components/WinRateDonutChart';
 import { DataSeriesChart, convertTrendChartData } from './components/DataSeriesChart';
 import ToastAlertContainer from './components/ToastAlertContainer';
-import { ToastAlert, ToastAlertProps} from './components/ToastAlert';
+import { ToastAlertProps} from './components/ToastAlert';
 
-function App() {
+const App = () => {
   const [username, setUsername] = useState<string>('physicskush');
   const [gamesCount, setGamesCount] = useState<number>(3);
   const [gameMode, setGameMode] = useState<string>('blitz');
   const [userColor, setUserColor] = useState<string>('white');
-
   const [response, setResponse] = useState<ResponseInformation | null>(null);
-
   const [toasts, setToasts] = useState<ToastAlertProps[]>([]);
 
   const removeToast = (id: number) => {
@@ -30,7 +28,6 @@ function App() {
     const newToast: ToastAlertProps = { id: Date.now(), message, removeToast };
     setToasts((prevToasts: ToastAlertProps[] ) => [...prevToasts, newToast]);
   };
-
 
   const handleSendData = async () => {
     try {
@@ -65,7 +62,7 @@ function App() {
                     />
                   </div>
                   <div>
-                    <DataSeriesChart {...convertTrendChartData(response.trend_chart_data)} />
+                    <DataSeriesChart key={response.unique_key} {...convertTrendChartData(response.trend_chart_data)} />
                   </div>
                 </div>
               )
