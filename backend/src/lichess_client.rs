@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::deserialization::GameJson;
-use crate::errors_manager::ProcessError;
+use crate::errors_manager::{self, ProcessError};
 use crate::games_info_generator::{self, GameInfo};
 use crate::games_info_processor::{
     get_half_time_differentials, process_average_time, process_win_rate,
@@ -56,7 +56,7 @@ pub async fn process_response_stream(
                             &username_ref,
                         ));
                     }
-                    Err(e) => {
+                    Err(_) => {
                         let mut lock = skipped_games_ref.lock().await;
                         lock.entry(game_idx).or_insert_with(|| {
                             GameFetchWarning::InternalErrorOccuredWhileProcessingAGame
@@ -67,7 +67,10 @@ pub async fn process_response_stream(
                 Ok(())
             }
         })
-        .await?;
+        .await
+        .map_err(|_| ProcessError::InternalError {
+            message: "An error occurred while fetching player data.".into(),
+        })?;
 
     Ok(())
 }
@@ -75,63 +78,51 @@ pub async fn process_response_stream(
 pub async fn handle_successful_response(
     request_data: ChessDataRequest,
     response: Response,
-) -> HttpResponse {
+) -> Result<HttpResponse, ProcessError> {
     let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
     let mut games_info: Vec<GameInfo> = Vec::new();
 
-    match process_response_stream(&mut games_info, request_data, response, &mut skipped_games).await
-    {
-        Ok(_) => {
-            let half_time_differentials =
-                get_half_time_differentials(&games_info, &mut skipped_games, false);
-            let average_time = process_average_time(&half_time_differentials);
-            let win_rate = process_win_rate(&games_info, &skipped_games);
-            let trend_chart_data = trend_chart_generator::generate(
-                &games_info,
-                &skipped_games,
-                half_time_differentials,
-            );
+    process_response_stream(&mut games_info, request_data, response, &mut skipped_games).await?;
 
-            // For UI testing purposes:
-            //    Adding a bunch of games with error message for errors side panel
-            util::generate_dummy_erros_testing(&mut skipped_games);
+    let half_time_differentials =
+        get_half_time_differentials(&games_info, &mut skipped_games, false);
+    let average_time = process_average_time(&half_time_differentials);
+    let win_rate = process_win_rate(&games_info, &skipped_games);
+    let trend_chart_data =
+        trend_chart_generator::generate(&games_info, &skipped_games, half_time_differentials);
 
-            let insights: InsightsPanelProps =
-                insight_generator::get_insights(average_time, win_rate);
+    // For UI testing purposes:
+    //    Adding a bunch of games with error message for errors side panel
+    util::generate_dummy_erros_testing(&mut skipped_games);
 
-            HttpResponse::Ok().json(ChessDataResponse::new(
-                insights.average_time,
-                insights.explanation_message,
-                skipped_games,
-                insights.win_ratio,
-                trend_chart_data,
-            ))
-        }
-        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
-    }
+    let insights: InsightsPanelProps = insight_generator::get_insights(average_time, win_rate);
+
+    Ok(HttpResponse::Ok().json(ChessDataResponse::new(
+        insights.average_time,
+        insights.explanation_message,
+        skipped_games,
+        insights.win_ratio,
+        trend_chart_data,
+    )))
 }
 
-pub fn handle_unsuccessful_response() -> HttpResponse {
-    HttpResponse::InternalServerError().body("Lichess API returned non-success status")
-}
-
-pub async fn fetch_player_data(request_data: ChessDataRequest) -> HttpResponse {
+pub async fn fetch_player_data(
+    request_data: ChessDataRequest,
+) -> Result<HttpResponse, ProcessError> {
     let url = get_url(&request_data);
     let client = reqwest::Client::new();
-
-    match client
+    let response = client
         .get(&url)
         .header("Accept", "application/x-ndjson")
         .send()
         .await
-    {
-        Ok(response) => {
-            if response.status().is_success() {
-                handle_successful_response(request_data, response).await
-            } else {
-                handle_unsuccessful_response()
-            }
-        }
-        Err(_) => HttpResponse::InternalServerError().body("Failed to fetch data from Lichess API"),
+        .map_err(ProcessError::from)?;
+
+    if response.status().is_success() {
+        handle_successful_response(request_data, response).await
+    } else {
+        Err(ProcessError::FetchError {
+            message: "There was a problem fetching the data".into(),
+        })
     }
 }

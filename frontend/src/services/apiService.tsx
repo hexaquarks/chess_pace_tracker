@@ -48,7 +48,8 @@ export const sendDataToBackend = async (
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorResponse = await response.json();
+      throw new Error(errorResponse.error || `HTTP error! status: ${response.status}`);
     }
 
     const data: ResponseInformation = await response.json();
