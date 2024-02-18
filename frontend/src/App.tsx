@@ -11,6 +11,7 @@ import WinRateDonutChart from './components/WinRateDonutChart';
 import { DataSeriesChart, convertTrendChartData } from './components/DataSeriesChart';
 import ToastAlertContainer from './components/ToastAlertContainer';
 import { ToastAlertProps} from './components/ToastAlert';
+import ClipLoader from "react-spinners/ClipLoader";
 
 const App = () => {
   const [username, setUsername] = useState<string>('physicskush');
@@ -19,6 +20,7 @@ const App = () => {
   const [userColor, setUserColor] = useState<string>('white');
   const [response, setResponse] = useState<ResponseInformation | null>(null);
   const [toasts, setToasts] = useState<ToastAlertProps[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const removeToast = (id: number) => {
     setToasts((prevToasts: ToastAlertProps[]) => prevToasts.filter((toast) => toast.id !== id));
@@ -31,15 +33,23 @@ const App = () => {
 
   const handleSendData = async () => {
     try {
+      setIsLoading(true); 
       const responseData: ResponseInformation = await sendDataToBackend(username, gamesCount, gameMode, userColor);
       setResponse(responseData);
     } catch (error) {
       addToast(error instanceof Error ? error.message : 'An unexpected error occurred');
+    } finally {
+      setIsLoading(false); 
     }
   };
 
   return (
     <div>
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+          <ClipLoader color="#FFFFFF" loading={isLoading} size={75} />
+        </div>
+      )}
       <ToastAlertContainer toasts={toasts} removeToast={removeToast} />
       <div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">
         <div className="flex flex-row justify-center w-full max-w-7xl">
