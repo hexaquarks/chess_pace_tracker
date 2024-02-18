@@ -16,23 +16,40 @@ code {
     monospace;
 }
 
-/* width */
+/*
+ * Scroll bar styles
+ */
 ::-webkit-scrollbar {
     width: 10px;
 }
- 
-/* Track */
 ::-webkit-scrollbar-track {
     background: #18181b;
 }
- 
-/* Handle */
 ::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 5px;
 }
- 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+/*
+ * react-transition-group styles
+ */
+.toast-enter {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+.toast-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 500ms, transform 500ms;
+}
+.toast-exit {
+  opacity: 1;
+}
+.toast-exit-active {
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: opacity 500ms, transform 500ms;
 }
