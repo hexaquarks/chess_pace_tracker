@@ -36,9 +36,7 @@ pub async fn process_response_stream(
 ) -> Result<(), ProcessError> {
     let games_info_arc = Arc::new(Mutex::new(games_info));
     let skipped_games_arc = Arc::new(Mutex::new(skipped_games));
-
-    // start from end because we want to process the stream starting from the end.
-    let mut game_idx = (request_data.games_count - 1) as usize;
+    let mut game_idx = 0;
 
     let stream = request_response.bytes_stream();
     let username = request_data.username;
@@ -65,7 +63,7 @@ pub async fn process_response_stream(
                         });
                     }
                 }
-                game_idx -= 1;
+                game_idx += 1;
                 Ok(())
             }
         })
@@ -86,9 +84,6 @@ pub async fn handle_successful_response(
 
     process_response_stream(&mut games_info, request_data, response, &mut skipped_games).await?;
 
-    // Reverse the games returned because we expect the stream to start from the end.
-    games_info.reverse();
-    
     let half_time_differentials =
         get_half_time_differentials(&games_info, &mut skipped_games, false);
     let average_time = process_average_time(&half_time_differentials);
