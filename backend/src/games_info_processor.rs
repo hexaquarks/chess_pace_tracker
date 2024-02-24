@@ -8,27 +8,30 @@ use crate::util;
 const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 7;
 
 /// Heuristics:
-/// Check unit tests at bottom of file
+//  It really doesn't matter logistically if the half time differential is slightly offset.    
+//  A B C D E F G H     --> 8 / 2  = 4 (E) ==> Take (midpoint, midpoint + 1)
+//  A B C D E F G       --> 7 / 2  = 3 (D) ==> Take (midpoint - 1, midpoint)
+//  A B C D E F G H I J --> 10 / 2 = 5 (F) ==> Take (midpoint - 1, midpoint)
+//  A B C D E F G H I   --> 9 / 2  = 4 (E) ==> Take (midpoint, midpoint + 1)
 fn get_half_moves(
     timed_moves: &[TimedMove],
     midpoint: usize,
     is_moves_even: bool,
     is_user_first_mover: bool,
 ) -> (TimedMove, TimedMove) {
-    let (user_index, opponent_index) = if is_moves_even {
-        (midpoint - 1, midpoint)
+    let (white_move_index, black_move_index) = if midpoint % 2 == 0 {
+        (midpoint, midpoint + 1)
     } else {
-        (midpoint, midpoint - 1)
+        (midpoint - 1, midpoint)
     };
 
-    let user_move = timed_moves[user_index].clone();
-    let opponent_move = timed_moves[opponent_index].clone();
+    let white_move = timed_moves[white_move_index].clone();
+    let black_move = timed_moves[black_move_index].clone();
 
-    // Standardize order of return user first and opponent second.
-    if (is_user_first_mover && is_moves_even) || (!is_user_first_mover && !is_moves_even) {
-        (opponent_move, user_move)
+    if is_user_first_mover {
+        (white_move, black_move)
     } else {
-        (user_move, opponent_move)
+        (black_move, white_move)
     }
 }
 
@@ -136,10 +139,10 @@ mod tests {
 
     #[test]
     fn test_get_half_moves() {
-        // A B C D
+        // A B C D E F G H
         // even moves, user goes first
         {
-            let even_number_of_moves_user_first = make_move_sequence_test(4);
+            let even_number_of_moves_user_first = make_move_sequence_test(8);
             let half_move = get_half_moves(
                 &even_number_of_moves_user_first,
                 even_number_of_moves_user_first.len() / 2,
@@ -147,13 +150,13 @@ mod tests {
                 true,
             );
 
-            assert_eq!(half_move.0.move_key, "C");
-            assert_eq!(half_move.1.move_key, "B");
+            assert_eq!(half_move.0.move_key, "E");
+            assert_eq!(half_move.1.move_key, "F");
         }
 
         // even moves, opponent goes first
         {
-            let even_number_of_moves_opponent_first = make_move_sequence_test(4);
+            let even_number_of_moves_opponent_first = make_move_sequence_test(8);
             let half_move = get_half_moves(
                 &even_number_of_moves_opponent_first,
                 even_number_of_moves_opponent_first.len() / 2,
@@ -161,14 +164,14 @@ mod tests {
                 false,
             );
 
-            assert_eq!(half_move.0.move_key, "B");
-            assert_eq!(half_move.1.move_key, "C");
+            assert_eq!(half_move.0.move_key, "F");
+            assert_eq!(half_move.1.move_key, "E");
         }
 
-        // A B C D E
+        // A B C D E F G H I
         // odd moves, user goes first
         {
-            let odd_number_of_moves_user_first = make_move_sequence_test(4);
+            let odd_number_of_moves_user_first = make_move_sequence_test(9);
             let half_move = get_half_moves(
                 &odd_number_of_moves_user_first,
                 odd_number_of_moves_user_first.len() / 2,
@@ -176,13 +179,13 @@ mod tests {
                 true,
             );
 
-            assert_eq!(half_move.0.move_key, "C");
-            assert_eq!(half_move.1.move_key, "B");
+            assert_eq!(half_move.0.move_key, "E");
+            assert_eq!(half_move.1.move_key, "F");
         }
 
         // odd moves, opponent goes first
         {
-            let odd_number_of_moves_opponent_first = make_move_sequence_test(4);
+            let odd_number_of_moves_opponent_first = make_move_sequence_test(9);
             let half_move = get_half_moves(
                 &odd_number_of_moves_opponent_first,
                 odd_number_of_moves_opponent_first.len() / 2,
@@ -190,8 +193,8 @@ mod tests {
                 false,
             );
 
-            assert_eq!(half_move.0.move_key, "B");
-            assert_eq!(half_move.1.move_key, "C");
+            assert_eq!(half_move.0.move_key, "F");
+            assert_eq!(half_move.1.move_key, "E");
         }
     }
 
@@ -210,7 +213,7 @@ mod tests {
             let res = process_average_time(&half_time_differentials);
             assert_eq!(res.is_some(), true);
 
-            let expected_average = (5.78 + 0.08) / 2.0;
+            let expected_average = -(5.78 + 0.08) / 2.0;
             assert_eq!(res.unwrap(), expected_average as f32);
         }
 
@@ -243,7 +246,7 @@ mod tests {
             let res = process_average_time(&half_time_differentials);
 
             assert_eq!(res.is_some(), true);
-            assert_eq!(res.unwrap(), convert_centiseconds_to_seconds(8));
+            assert_eq!(res.unwrap(), convert_centiseconds_to_seconds(-8));
         }
     }
 }
