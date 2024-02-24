@@ -19,12 +19,18 @@ use serde_json;
 use tokio::sync::Mutex;
 
 pub fn get_url(request_data: &ChessDataRequest) -> String {
+    // Note the color query parameter acts like a filter. If the user_color in the
+    // request structure contains "both", we omit the color query parameter all together.
     format!(
-        "https://lichess.org/api/games/user/{}?max={}&perfType={}&color={}&rated=true&clocks=true",
+        "https://lichess.org/api/games/user/{}?max={}&perfType={}{}&rated=true&clocks=true",
         request_data.username,
         request_data.games_count,
         request_data.game_mode,
-        request_data.user_color
+        if request_data.user_color == "both" {
+            String::new()
+        } else {
+            format!("&color={}", request_data.user_color)
+        }
     )
 }
 

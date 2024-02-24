@@ -16,6 +16,7 @@ const UserColorInput: React.FC<UserColorInputProps> = ({ value, onChange }) => (
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >
+      <option value="both">Both</option>
       <option value="white">White</option>
       <option value="black">Black</option>
     </select>

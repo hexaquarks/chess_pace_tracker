@@ -8,7 +8,7 @@ use crate::util;
 const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 7;
 
 /// Heuristics:
-//  It really doesn't matter logistically if the half time differential is slightly offset.    
+//  It really doesn't matter logistically if the half time differential is slightly offset.
 //  A B C D E F G H     --> 8 / 2  = 4 (E) ==> Take (midpoint, midpoint + 1)
 //  A B C D E F G       --> 7 / 2  = 3 (D) ==> Take (midpoint - 1, midpoint)
 //  A B C D E F G H I J --> 10 / 2 = 5 (F) ==> Take (midpoint - 1, midpoint)
@@ -16,8 +16,7 @@ const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 7;
 fn get_half_moves(
     timed_moves: &[TimedMove],
     midpoint: usize,
-    is_moves_even: bool,
-    is_user_first_mover: bool,
+    is_user_white: bool,
 ) -> (TimedMove, TimedMove) {
     let (white_move_index, black_move_index) = if midpoint % 2 == 0 {
         (midpoint, midpoint + 1)
@@ -28,7 +27,7 @@ fn get_half_moves(
     let white_move = timed_moves[white_move_index].clone();
     let black_move = timed_moves[black_move_index].clone();
 
-    if is_user_first_mover {
+    if is_user_white {
         (white_move, black_move)
     } else {
         (black_move, white_move)
@@ -39,15 +38,10 @@ pub fn compute_curr_game_time_differential(game: &GameInfo) -> i32 {
     let timed_moves: &[TimedMove] = game.timed_moves.as_ref();
 
     let middle_cut_idx: usize = timed_moves.len() / 2;
-    let is_user_the_first_to_move = game.user_color == timed_moves[0].move_key;
-    let is_n_moves_even = timed_moves.len() % 2 == 0;
+    let is_user_white = game.user_color == "white";
 
-    let (user_half_move, opponent_half_move) = get_half_moves(
-        &timed_moves,
-        middle_cut_idx,
-        is_n_moves_even,
-        is_user_the_first_to_move,
-    );
+    let (user_half_move, opponent_half_move) =
+        get_half_moves(&timed_moves, middle_cut_idx, is_user_white);
 
     (user_half_move.move_time - opponent_half_move.move_time) as i32
 }
@@ -147,7 +141,6 @@ mod tests {
                 &even_number_of_moves_user_first,
                 even_number_of_moves_user_first.len() / 2,
                 true,
-                true,
             );
 
             assert_eq!(half_move.0.move_key, "E");
@@ -156,11 +149,10 @@ mod tests {
 
         // even moves, opponent goes first
         {
-            let even_number_of_moves_opponent_first = make_move_sequence_test(8);
+            let even_number_of_moves_opponent_first: Vec<TimedMove> = make_move_sequence_test(8);
             let half_move = get_half_moves(
                 &even_number_of_moves_opponent_first,
                 even_number_of_moves_opponent_first.len() / 2,
-                true,
                 false,
             );
 
@@ -175,7 +167,6 @@ mod tests {
             let half_move = get_half_moves(
                 &odd_number_of_moves_user_first,
                 odd_number_of_moves_user_first.len() / 2,
-                false,
                 true,
             );
 
@@ -189,7 +180,6 @@ mod tests {
             let half_move = get_half_moves(
                 &odd_number_of_moves_opponent_first,
                 odd_number_of_moves_opponent_first.len() / 2,
-                false,
                 false,
             );
 
