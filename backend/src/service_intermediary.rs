@@ -1,11 +1,13 @@
 use std::collections::HashMap;
+use std::time::Instant;
 
+use crate::database;
 use crate::deserialization;
 use crate::lichess_client;
 use crate::trend_chart_generator::TrendChartDatum;
 
 use actix_web::ResponseError;
-use actix_web::{post, web, Responder};
+use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -69,8 +71,23 @@ impl ChessDataResponse {
 
 #[post("/fetch-chess-data")]
 pub async fn fetch_chess_data(info: web::Json<ChessDataRequest>) -> impl Responder {
-    match lichess_client::fetch_player_data(info.into_inner()).await {
-        Ok(response) => response,
+    let start_time = Instant::now();
+
+    match lichess_client::fetch_player_data(&info).await {
+        Ok(response) => {
+            let end_time = Instant::now();
+            let processing_time = end_time.duration_since(start_time).as_secs_f32();
+
+            match database::log_request_data(
+                info.games_count,
+                info.game_mode.as_str(),
+                info.user_color.as_str(),
+                processing_time,
+            ) {
+                Ok(_) => response,
+                Err(_) => HttpResponse::InternalServerError().finish(),
+            }
+        }
         Err(e) => e.error_response(),
     }
 }

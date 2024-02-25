@@ -36,7 +36,7 @@ pub fn get_url(request_data: &ChessDataRequest) -> String {
 
 pub async fn process_response_stream(
     games_info: &mut Vec<GameInfo>,
-    request_data: ChessDataRequest,
+    request_data: &ChessDataRequest,
     request_response: Response,
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
 ) -> Result<(), ProcessError> {
@@ -45,7 +45,7 @@ pub async fn process_response_stream(
     let mut game_idx = 0;
 
     let stream = request_response.bytes_stream();
-    let username = request_data.username;
+    let username = request_data.username.as_str();
     stream
         .try_for_each_concurrent(None, move |game_bytes| {
             let games_info_ref = games_info_arc.clone();
@@ -59,7 +59,7 @@ pub async fn process_response_stream(
                         lock.push(games_info_generator::generate(
                             &game_json,
                             &game_idx,
-                            &username_ref,
+                            &username_ref.to_string(),
                         ));
                     }
                     Err(_) => {
@@ -82,7 +82,7 @@ pub async fn process_response_stream(
 }
 
 pub async fn handle_successful_response(
-    request_data: ChessDataRequest,
+    request_data: &ChessDataRequest,
     response: Response,
 ) -> Result<HttpResponse, ProcessError> {
     let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
@@ -113,7 +113,7 @@ pub async fn handle_successful_response(
 }
 
 pub async fn fetch_player_data(
-    request_data: ChessDataRequest,
+    request_data: &ChessDataRequest,
 ) -> Result<HttpResponse, ProcessError> {
     let url = get_url(&request_data);
     let client = reqwest::Client::new();

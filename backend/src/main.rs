@@ -1,3 +1,4 @@
+mod database;
 mod deserialization;
 mod errors_manager;
 mod games_info_generator;
@@ -14,6 +15,9 @@ use actix_web::{http::header, App, HttpServer};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    database::create_database()
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
+
     HttpServer::new(|| {
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000")
