@@ -30,14 +30,12 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
         const gameNumber = gameNumbers[dataPointIndex];
     
         return (
-          '<div class="arrow_box" style="padding: 10px; text-align: center;">' +
-          '<span style="font-size: 16px; font-weight: bold;">' + signedTimeFormatter(value) + '</span>' +
-          '<br>' + 
-          '<span>' + status + '</span>' +
-          '<br>' +
-          '<span>' + 'Game ' + gameNumber + '</span>' +
-          '</div>'
-        );
+            `<div class="apexcharts-tooltip-title" style="font-size: 16px; font-weight: bold; padding: 4px; margin-bottom: -5px">${signedTimeFormatter(value)}</div>` +
+            `<div class="apexcharts-tooltip-series-group" style="padding: 10px; text-align: left; display: block;">` +
+            `<span class="apexcharts-tooltip-text" style="display: block;">Status: <span style="font-weight: bold;">` + status + `</span></span>` +
+            `<span class="apexcharts-tooltip-text" style="display: block;">Game: <span style="font-weight: bold;">` + gameNumber + `</span></span>` +
+            `</div>`
+          );          
     }
 
     const signedTimeFormatter = (time: number) => { 
@@ -65,7 +63,8 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
                 },
             },
             tooltip: {
-                custom: tooltipFormatter
+                custom: tooltipFormatter,
+                theme: "dark"
               },
             legend: {
                 show: false
@@ -73,11 +72,10 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
             fill: {
                 type: "gradient",
                 gradient: {
-                    opacityFrom: 0.55,
-                    opacityTo: 0,
-                    shade: "#1C64F2",
+                    opacityFrom: 0,
+                    opacityTo: 0.55,
                     gradientToColors: ["#1C64F2"],
-                },
+                }
             },
             dataLabels: {
                 style: {
@@ -125,17 +123,41 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
                   }
               },
             yaxis: {
-                show: false,
                 labels: {
-                    formatter: function (value: number) {
-                        return (value > 0.0 ? '+' + value : value)+ 's';
-                    }
+                    show: false,
+                  align: 'left'
                 }
-            },
+              },
+              annotations: {
+                yaxis: [{
+                  y: 0,
+                  borderColor: 'rgba(255, 255, 255, 0.3)', 
+                  strokeDashArray: 5,
+                  label: {
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    style: {
+                      color: '#fff',
+                      background: 'transparent'
+                    },
+                    text: '0.0s',
+                    position: 'left', 
+                    offsetX: -10, 
+                    offsetY: 7
+                  }
+                }]
+              }
         }
 
         const chart = new ApexCharts(document.querySelector("#data-series-chart"), options);
-        chart.render();
+        chart.render().then(() => {
+            // We explicitly set the svg (chart) generated's overflow property 
+            // to visible, otherwise some marker faces will be cropped at the 
+            // beggining and end of the chart area.
+            const svgElement = document.querySelector("#data-series-chart svg");
+            if (svgElement instanceof SVGSVGElement) { 
+                svgElement.style.overflow = 'visible';
+            }
+        });
 
         return () => {
             chart.destroy();
