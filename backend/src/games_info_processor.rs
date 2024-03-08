@@ -112,6 +112,38 @@ pub fn process_win_rate(
     n_wins as f32 / n_games_considered as f32
 }
 
+pub fn process_flag_info(
+    games: &[GameInfo],
+    skipped_games: &HashMap<usize, GameFetchWarning>,
+) -> (i32, i32) {
+    let mut n_considered_games = games.len();
+    let mut n_user_flags = 0;
+    let mut n_opponent_flags = 0;
+
+    for (i, game_info) in games.iter().enumerate() {
+        if skipped_games.contains_key(&i) {
+            // The current game has already an internal error.
+            // Skip it from the computation.
+            n_considered_games -= 1;
+            continue;
+        }
+
+        match util::get_game_flagging_information(game_info) {
+            Some(has_user_flagged_opponent) => {
+                if has_user_flagged_opponent {
+                    n_user_flags += 1;
+                } else {
+                    n_opponent_flags += 1;
+                }
+            }
+            None => { // No one flagged anyone }
+            }
+        }
+    }
+
+    (n_user_flags, n_opponent_flags)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::util::convert_centiseconds_to_seconds;

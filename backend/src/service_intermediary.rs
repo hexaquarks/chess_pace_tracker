@@ -46,6 +46,7 @@ pub struct ChessDataResponse {
     pub games_with_errors: Vec<(usize, String)>,
     pub player_win_rate_in_fetched_games: String,
     pub trend_chart_data: Vec<TrendChartDatum>,
+    pub players_flag_counts: (i32, i32),
 }
 
 impl ChessDataResponse {
@@ -55,6 +56,7 @@ impl ChessDataResponse {
         games_with_errors: HashMap<usize, GameFetchWarning>,
         player_win_rate_in_fetched_games: String,
         trend_chart_data: Vec<TrendChartDatum>,
+        players_flag_counts: (i32, i32),
     ) -> Self {
         let errors_vec =
             deserialization::convert_games_with_errors_to_displayable_format(games_with_errors);
@@ -65,6 +67,7 @@ impl ChessDataResponse {
             games_with_errors: errors_vec,
             player_win_rate_in_fetched_games,
             trend_chart_data,
+            players_flag_counts,
         }
     }
 }

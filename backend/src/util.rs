@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::games_info_generator::GameInfo;
+use crate::games_info_generator::{GameInfo, TimedMove};
 use crate::service_intermediary::GameFetchWarning;
 
 pub fn compute_average(times: &[f32]) -> f32 {
@@ -30,4 +30,37 @@ pub fn has_user_won_game(game: &GameInfo) -> bool {
         return game.user_color == *game.winner_color.as_ref().unwrap();
     }
     false
+}
+
+pub fn get_game_flagging_information(game: &GameInfo) -> Option<bool> {
+    let times = game
+        .timed_moves
+        .iter()
+        .map(|time_move| time_move.move_time)
+        .collect::<Vec<i64>>();
+
+    if times.len() < 3 {
+        panic!();
+    }
+
+    let mut white_time = times[0];
+    let mut black_time = times[1];
+
+    for (index, time_spent) in times[2..].iter().enumerate() {
+        if index % 2 == 0 {
+            white_time -= time_spent;
+            if white_time <= 0 {
+                // Black flagged white
+                return Some(game.user_color == "black".to_string());
+            }
+        } else {
+            black_time -= time_spent;
+            if black_time <= 0 {
+                // White flagged black
+                return Some(game.user_color == "white".to_string());
+            }
+        }
+    }
+
+    None // No one flagged anyone
 }

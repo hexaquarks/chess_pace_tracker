@@ -5,7 +5,7 @@ use crate::deserialization::GameJson;
 use crate::errors_manager::{self, ProcessError};
 use crate::games_info_generator::{self, GameInfo};
 use crate::games_info_processor::{
-    get_half_time_differentials, process_average_time, process_win_rate,
+    get_half_time_differentials, process_average_time, process_flag_info, process_win_rate,
 };
 use crate::insight_generator::{self, InsightsPanelProps};
 use crate::service_intermediary::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
@@ -94,14 +94,14 @@ pub async fn handle_successful_response(
         get_half_time_differentials(&games_info, &mut skipped_games, false);
     let average_time = process_average_time(&half_time_differentials);
     let win_rate = process_win_rate(&games_info, &skipped_games);
+    let (user_flag_count, opponent_flag_cout) = process_flag_info(&games_info, &skipped_games);
     let trend_chart_data =
         trend_chart_generator::generate(&games_info, &skipped_games, half_time_differentials);
+    let insights: InsightsPanelProps = insight_generator::get_insights(average_time, win_rate);
 
     // For UI testing purposes:
     //    Adding a bunch of games with error message for errors side panel
     util::generate_dummy_erros_testing(&mut skipped_games);
-
-    let insights: InsightsPanelProps = insight_generator::get_insights(average_time, win_rate);
 
     Ok(HttpResponse::Ok().json(ChessDataResponse::new(
         insights.average_time,
@@ -109,6 +109,7 @@ pub async fn handle_successful_response(
         skipped_games,
         insights.win_ratio,
         trend_chart_data,
+        (user_flag_count, opponent_flag_cout),
     )))
 }
 
