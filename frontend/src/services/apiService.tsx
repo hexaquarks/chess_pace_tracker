@@ -23,6 +23,7 @@ interface ResponseInformationInternal {
   games_with_errors: Array<[number, string]>
   trend_chart_data: [TrendChartDatum]
   player_win_rate_in_fetched_games: number
+  players_flag_counts: [number, number]
 }
 
 export interface ResponseInformation {
@@ -31,6 +32,7 @@ export interface ResponseInformation {
   games_with_errors: Array<[number, string]>
   trend_chart_data: [TrendChartDatum]
   player_win_rate_in_fetched_games: number
+  players_flag_counts: [number, number]
   unique_key: number
 }
 

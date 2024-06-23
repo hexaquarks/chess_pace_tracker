@@ -44,8 +44,8 @@ pub struct ChessDataResponse {
     pub time: String,
     pub explanation_message: (String, DescriptionMessageAssessment),
     pub games_with_errors: Vec<(usize, String)>,
-    pub player_win_rate_in_fetched_games: String,
     pub trend_chart_data: Vec<TrendChartDatum>,
+    pub player_win_rate_in_fetched_games: String,
     pub players_flag_counts: (i32, i32),
 }
 
@@ -54,8 +54,8 @@ impl ChessDataResponse {
         time: String,
         explanation_message: (String, DescriptionMessageAssessment),
         games_with_errors: HashMap<usize, GameFetchWarning>,
-        player_win_rate_in_fetched_games: String,
         trend_chart_data: Vec<TrendChartDatum>,
+        player_win_rate_in_fetched_games: String,
         players_flag_counts: (i32, i32),
     ) -> Self {
         let errors_vec =
@@ -65,8 +65,8 @@ impl ChessDataResponse {
             time,
             explanation_message,
             games_with_errors: errors_vec,
-            player_win_rate_in_fetched_games,
             trend_chart_data,
+            player_win_rate_in_fetched_games,
             players_flag_counts,
         }
     }

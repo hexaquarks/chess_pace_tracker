@@ -7,6 +7,7 @@ import SendDataButton from './components/SendDataButton';
 import { sendDataToBackend, ResponseInformation, MessageInformationAssessment } from './services/apiService';
 import ResponsePanel from './components/ResponsePanel';
 import ErrorsPanel from './components/ErrorsPanel';
+import { FlagPanel, extractFlagginInfoFromResponse } from './components/FlagPanel';
 import WinRateDonutChart from './components/WinRateDonutChart';
 import { DataSeriesChart, convertTrendChartData } from './components/DataSeriesChart';
 import ToastAlertContainer from './components/ToastAlertContainer';
@@ -86,7 +87,7 @@ const App = () => {
                 gamesWithError={response.games_with_errors}
               />
               <WinRateDonutChart winRate={response.player_win_rate_in_fetched_games} />
-
+              <FlagPanel key={response.unique_key} {...extractFlagginInfoFromResponse(response)}/>
             </div>
           )}
         </div>

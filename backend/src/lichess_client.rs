@@ -107,8 +107,8 @@ pub async fn handle_successful_response(
         insights.average_time,
         insights.explanation_message,
         skipped_games,
-        insights.win_ratio,
         trend_chart_data,
+        insights.win_ratio,
         (user_flag_count, opponent_flag_cout),
     )))
 }
