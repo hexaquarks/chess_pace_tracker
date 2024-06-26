@@ -1,12 +1,14 @@
+use serde::Serialize;
+
 use crate::deserialization::GameJson;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct TimedMove {
     pub move_key: String,
     pub move_time: i64,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct GameInfo {
     pub game_index: usize,
     pub timed_moves: Vec<TimedMove>,
@@ -55,7 +57,7 @@ pub fn get_user_color(game: &GameJson, user_name: &str) -> String {
     if let Some(players) = game.players.as_ref() {
         if let Some(black_player) = players.black.as_ref() {
             if let Some(user) = black_player.user.as_ref() {
-                if user.name.as_ref() == Some(&user_name.to_string()) {
+                if user.name.as_ref().unwrap().to_lowercase() == user_name.to_lowercase() {
                     return "black".to_string();
                 }
             }
@@ -96,7 +98,7 @@ pub fn generate(game: &GameJson, game_idx: &usize, user_name: &String) -> GameIn
     };
     let opponent_rating = get_user_rating(game, opponent_color);
 
-    GameInfo {
+    let a = GameInfo {
         game_index: *game_idx,
         timed_moves: generate_timed_moves(game),
         user_color: user_color,
@@ -104,5 +106,8 @@ pub fn generate(game: &GameJson, game_idx: &usize, user_name: &String) -> GameIn
         opponent_rating: opponent_rating,
         winner_color: get_winner_color(game),
         game_status: get_game_status(game),
-    }
+    };
+    let json = serde_json::to_string_pretty(&game).unwrap();
+    //println!("{}", json);
+    a
 }
