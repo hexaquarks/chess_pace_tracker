@@ -40,27 +40,18 @@ pub fn get_game_flagging_information(game: &GameInfo) -> Option<bool> {
         .collect::<Vec<i64>>();
 
     if times.len() < 3 {
-        panic!();
+        panic!(); // Why did I add this lol?
     }
 
-    let mut white_time = times[0];
-    let mut black_time = times[1];
-
-    for (index, time_spent) in times[2..].iter().enumerate() {
-        if index % 2 == 0 {
-            white_time -= time_spent;
-            if white_time <= 0 {
-                // Black flagged white
-                return Some(game.user_color == "black".to_string());
-            }
-        } else {
-            black_time -= time_spent;
-            if black_time <= 0 {
-                // White flagged black
-                return Some(game.user_color == "white".to_string());
-            }
-        }
+    if is_game_draw(game) {
+        // No one flagged anyone
+        return None;
     }
 
-    None // No one flagged anyone
+    // TODO extract var and check what other types of game status the API can return.
+    if game.game_status == "outoftime" {
+        return Some(has_user_won_game(game));
+    }
+
+    None
 }

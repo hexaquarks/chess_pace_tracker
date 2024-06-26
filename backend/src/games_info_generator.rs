@@ -1,11 +1,12 @@
 use crate::deserialization::GameJson;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TimedMove {
     pub move_key: String,
     pub move_time: i64,
 }
 
+#[derive(Debug)]
 pub struct GameInfo {
     pub game_index: usize,
     pub timed_moves: Vec<TimedMove>,
@@ -13,6 +14,7 @@ pub struct GameInfo {
     pub user_rating: i32,
     pub opponent_rating: i32,
     pub winner_color: Option<String>, // If some then white or black, if none then draw
+    pub game_status: String,
 }
 
 pub fn generate_timed_moves(game: &GameJson) -> Vec<TimedMove> {
@@ -76,6 +78,10 @@ pub fn get_user_rating(game: &GameJson, user_color: &str) -> i32 {
     player_detail.as_ref().unwrap().rating.unwrap_or(0)
 }
 
+pub fn get_game_status(game: &GameJson) -> String {
+    game.status.as_ref().unwrap().to_string()
+}
+
 pub fn get_winner_color(game: &GameJson) -> Option<String> {
     game.winner.clone()
 }
@@ -89,13 +95,14 @@ pub fn generate(game: &GameJson, game_idx: &usize, user_name: &String) -> GameIn
         "black"
     };
     let opponent_rating = get_user_rating(game, opponent_color);
-    let game_info = GameInfo {
+
+    GameInfo {
         game_index: *game_idx,
         timed_moves: generate_timed_moves(game),
         user_color: user_color,
         user_rating: user_rating,
         opponent_rating: opponent_rating,
         winner_color: get_winner_color(game),
-    };
-    game_info
+        game_status: get_game_status(game),
+    }
 }

@@ -50,7 +50,6 @@ pub async fn process_response_stream(
         .try_for_each_concurrent(None, move |game_bytes| {
             let games_info_ref = games_info_arc.clone();
             let skipped_games_ref = skipped_games_arc.clone();
-            let username_ref = username.clone();
 
             async move {
                 match serde_json::from_slice::<GameJson>(&game_bytes) {
@@ -59,7 +58,7 @@ pub async fn process_response_stream(
                         lock.push(games_info_generator::generate(
                             &game_json,
                             &game_idx,
-                            &username_ref.to_string(),
+                            &username.to_string(),
                         ));
                     }
                     Err(_) => {
