@@ -5,7 +5,7 @@ use crate::service_intermediary::GameFetchWarning;
 use crate::unit_test_util;
 use crate::util;
 
-const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 7;
+const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 12;
 
 /// Heuristics:
 //  It really doesn't matter logistically if the half time differential is slightly offset.
@@ -116,7 +116,6 @@ pub fn process_flag_info(
     games: &[GameInfo],
     skipped_games: &HashMap<usize, GameFetchWarning>,
 ) -> (i32, i32) {
-    let mut n_considered_games = games.len();
     let mut n_user_flags = 0;
     let mut n_opponent_flags = 0;
 
@@ -124,7 +123,6 @@ pub fn process_flag_info(
         if skipped_games.contains_key(&i) {
             // The current game has already an internal error.
             // Skip it from the computation.
-            n_considered_games -= 1;
             continue;
         }
 

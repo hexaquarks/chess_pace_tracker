@@ -62,7 +62,7 @@ pub fn convert_games_with_errors_to_displayable_format(
         String::from("An internal error occured while processing this game."),
     );
 
-    games_with_errors
+    let mut converted_errors = games_with_errors
         .into_iter()
         .map(|(i, warning_enum)| {
             (
@@ -73,5 +73,8 @@ pub fn convert_games_with_errors_to_displayable_format(
                     .to_string(),
             )
         })
-        .collect()
+        .collect::<Vec<(usize, String)>>();
+
+    converted_errors.sort_by_key(|k| k.0.clone());
+    converted_errors
 }
