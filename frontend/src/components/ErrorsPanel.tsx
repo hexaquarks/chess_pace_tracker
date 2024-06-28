@@ -22,7 +22,7 @@ const ErrorsPanel: React.FC<ErrorsPanelProps> = ({ gamesWithError, totalNumberOf
             <div className="flex flex-col items-center rounded-lg bg-gray-800 text-white w-full">
                 <div className="flex flex-col items-center w-full pl-2 bg-white rounded-lg shadow md:flex-row dark:bg-gray-800">
                     <div className="flex flex-col justify-between w-full p-4 leading-normal">
-                        <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white text-center">{gamesWithError.length === 0 ? `No games were skipped` : `${gamesWithError.length}/${totalNumberOfGames} games were skipped`}</span>
+                        <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white text-center">{gamesWithError.length === 0 ? `No games were skipped` : `${gamesWithError.length} of ${totalNumberOfGames} games were skipped`}</span>
                     </div>
                 </div>
                 {gamesWithError.map(([gameNumber, errorMessage], i) => (

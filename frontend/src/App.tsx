@@ -85,7 +85,7 @@ const App = () => {
             <div className="w-1/4 flex flex-col">
               <ErrorsPanel
                 gamesWithError={response.games_with_errors} 
-                totalNumberOfGames={response.trend_chart_data.length}
+                totalNumberOfGames={gamesCount}
               />
               <WinRateDonutChart winRate={response.player_win_rate_in_fetched_games} />
               <FlagPanel key={response.unique_key} {...extractFlagginInfoFromResponse(response)}/>
