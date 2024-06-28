@@ -52,6 +52,10 @@ pub struct User {
 pub fn convert_games_with_errors_to_displayable_format(
     games_with_errors: HashMap<usize, GameFetchWarning>,
 ) -> Vec<(usize, String)> {
+    if games_with_errors.is_empty() {
+        return Vec::new();
+    }
+
     let mut enum_conversion_map: HashMap<GameFetchWarning, String> = HashMap::new();
     enum_conversion_map.insert(
         GameFetchWarning::GameHasNotEnoughMoves,
@@ -62,16 +66,25 @@ pub fn convert_games_with_errors_to_displayable_format(
         String::from("An internal error occured while processing this game."),
     );
 
-    games_with_errors
+    let mut converted_errors = games_with_errors
         .into_iter()
         .map(|(i, warning_enum)| {
             (
-                i,
+                i + 1, // Initially we enter the game index, we wish to display in non-indexed format.
                 enum_conversion_map
                     .get(&warning_enum)
                     .expect("Warning enum not found")
                     .to_string(),
             )
         })
-        .collect()
+        .collect::<Vec<(usize, String)>>();
+
+    // Sanity check
+    assert!(
+        !converted_errors.iter().any(|(i, _)| *i == 0),
+        "Game index should start from 1."
+    );
+
+    converted_errors.sort_by_key(|k| k.0.clone());
+    converted_errors
 }

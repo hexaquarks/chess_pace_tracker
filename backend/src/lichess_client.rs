@@ -89,7 +89,7 @@ pub async fn handle_successful_response(
 
     process_response_stream(&mut games_info, request_data, response, &mut skipped_games).await?;
 
-    let half_time_differentials =
+    let half_time_differentials: Vec<f32> =
         get_half_time_differentials(&games_info, &mut skipped_games, false);
     let average_time = process_average_time(&half_time_differentials);
     let win_rate = process_win_rate(&games_info, &skipped_games);
@@ -100,7 +100,7 @@ pub async fn handle_successful_response(
 
     // For UI testing purposes:
     //    Adding a bunch of games with error message for errors side panel
-    util::generate_dummy_erros_testing(&mut skipped_games);
+    // util::generate_dummy_erros_testing(&mut skipped_games);
 
     Ok(HttpResponse::Ok().json(ChessDataResponse::new(
         insights.average_time,

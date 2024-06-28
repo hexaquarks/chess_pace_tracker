@@ -14,9 +14,6 @@ export const extractFlagginInfoFromResponse = (response: ResponseInformation): F
   let opponentsFlagCount: number = response.players_flag_counts[1];
   let totalGamesConsidered: number = response.trend_chart_data.length;
 
-  console.log(userFlagCount)
-  console.log(opponentsFlagCount)
-
   return { userFlagCount, opponentsFlagCount, totalGamesConsidered };
 };
 
@@ -46,7 +43,7 @@ const renderFlagChart = ({ userFlagCount, opponentsFlagCount, totalGamesConsider
       show: false
     },
     xaxis: {
-      categories: ['Flagged', 'Mate', 'Mate'],
+      categories: ['flagged opponent', 'opponent flagged', 'total games'],
       labels: {
         show: false // Remove bottom x ticks
       }

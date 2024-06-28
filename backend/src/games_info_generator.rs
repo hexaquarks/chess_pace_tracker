@@ -98,7 +98,7 @@ pub fn generate(game: &GameJson, game_idx: &usize, user_name: &String) -> GameIn
     };
     let opponent_rating = get_user_rating(game, opponent_color);
 
-    let a = GameInfo {
+    GameInfo {
         game_index: *game_idx,
         timed_moves: generate_timed_moves(game),
         user_color: user_color,
@@ -106,8 +106,5 @@ pub fn generate(game: &GameJson, game_idx: &usize, user_name: &String) -> GameIn
         opponent_rating: opponent_rating,
         winner_color: get_winner_color(game),
         game_status: get_game_status(game),
-    };
-    let json = serde_json::to_string_pretty(&game).unwrap();
-    //println!("{}", json);
-    a
+    }
 }
