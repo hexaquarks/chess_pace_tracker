@@ -100,7 +100,7 @@ pub async fn handle_successful_response(
 
     // For UI testing purposes:
     //    Adding a bunch of games with error message for errors side panel
-    util::generate_dummy_erros_testing(&mut skipped_games);
+    // util::generate_dummy_erros_testing(&mut skipped_games);
 
     Ok(HttpResponse::Ok().json(ChessDataResponse::new(
         insights.average_time,
