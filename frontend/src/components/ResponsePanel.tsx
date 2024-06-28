@@ -32,7 +32,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ time, explanationMessage 
         <IconGetter />
       </div>
       <div className="flex-grow">
-        <p>{message}</p>
+        <p className="text-lg font-semibold">{message}</p>
         <p>{`Time: ${time}s`}</p>
       </div>
     </div>
