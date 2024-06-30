@@ -14,6 +14,8 @@ mod util;
 use actix_cors::Cors;
 use actix_web::{http::header, App, HttpServer};
 
+const BIND_ADDRESS: &str = "127.0.0.1:8000";
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     database::create_database()
@@ -31,7 +33,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .service(service_intermediary::fetch_chess_data)
     })
-    .bind("127.0.0.1:8000")?
+    .bind(BIND_ADDRESS)?
     .run()
     .await
 }

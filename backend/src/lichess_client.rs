@@ -8,7 +8,9 @@ use crate::games_info_processor::{
     get_half_time_differentials, process_average_time, process_flag_info, process_win_rate,
 };
 use crate::insight_generator::{self, InsightsPanelProps};
-use crate::service_intermediary::{ChessDataRequest, ChessDataResponse, GameFetchWarning};
+use crate::service_intermediary::{
+    ChessDataRequest, ChessDataResponse, GameFetchWarning, RequestSource,
+};
 use crate::trend_chart_generator;
 use crate::util;
 
@@ -82,20 +84,50 @@ pub async fn process_response_stream(
 
 pub async fn handle_successful_response(
     request_data: &ChessDataRequest,
+    requested_by: RequestSource,
     response: Response,
 ) -> Result<HttpResponse, ProcessError> {
     let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
     let mut games_info: Vec<GameInfo> = Vec::new();
 
+    // =========== STEP 1: Process the response stream ===========
     process_response_stream(&mut games_info, request_data, response, &mut skipped_games).await?;
 
+    // =========== STEP 2: Get the half time differentials ===========
     let half_time_differentials: Vec<f32> =
         get_half_time_differentials(&games_info, &mut skipped_games, false);
+
+    // =========== STEP 3: Get average time ===========
+    // Note: Average time might be None if 0 games were kept for the computation.
     let average_time = process_average_time(&half_time_differentials);
+
+    // If the request was made by the Python script, we only need to return the average time.
+    if requested_by == RequestSource::PythonScript {
+        match average_time {
+            Some(time) => {
+                return Ok(
+                    HttpResponse::Ok().json(ChessDataResponse::new_for_db_stats(time.to_string()))
+                );
+            }
+            None => {
+                return Err(ProcessError::DataError {
+                    message: "Data processing was incomplete for the requested sample.".into(),
+                });
+            }
+        }
+    }
+
+    // =========== STEP 4: Process win rate ===========
     let win_rate = process_win_rate(&games_info, &skipped_games);
+
+    // =========== STEP 5: Process flag info ===========
     let (user_flag_count, opponent_flag_cout) = process_flag_info(&games_info, &skipped_games);
+
+    // =========== STEP 6: Generate Trend Chart Data ===========
     let trend_chart_data =
         trend_chart_generator::generate(&games_info, &skipped_games, half_time_differentials);
+
+    // =========== STEP 7: Generate Insights ===========
     let insights: InsightsPanelProps = insight_generator::get_insights(average_time, win_rate);
 
     // For UI testing purposes:
@@ -114,6 +146,7 @@ pub async fn handle_successful_response(
 
 pub async fn fetch_player_data(
     request_data: &ChessDataRequest,
+    requested_by: RequestSource,
 ) -> Result<HttpResponse, ProcessError> {
     let url = get_url(&request_data);
     let client = reqwest::Client::new();
@@ -125,7 +158,7 @@ pub async fn fetch_player_data(
         .map_err(ProcessError::from)?;
 
     if response.status().is_success() {
-        handle_successful_response(request_data, response).await
+        handle_successful_response(request_data, requested_by, response).await
     } else {
         Err(ProcessError::FetchError {
             message: "There was a problem fetching the data".into(),

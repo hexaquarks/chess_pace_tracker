@@ -7,7 +7,7 @@ use crate::lichess_client;
 use crate::trend_chart_generator::TrendChartDatum;
 
 use actix_web::ResponseError;
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{http::header, post, web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -40,13 +40,18 @@ pub struct ChessDataRequest {
 }
 
 #[derive(Serialize)]
-pub struct ChessDataResponse {
-    pub time: String,
-    pub explanation_message: (String, DescriptionMessageAssessment),
-    pub games_with_errors: Vec<(usize, String)>,
-    pub trend_chart_data: Vec<TrendChartDatum>,
-    pub player_win_rate_in_fetched_games: String,
-    pub players_flag_counts: (i32, i32),
+pub enum ChessDataResponse {
+    RequestFromFrontend {
+        time: String,
+        explanation_message: (String, DescriptionMessageAssessment),
+        games_with_errors: Vec<(usize, String)>,
+        trend_chart_data: Vec<TrendChartDatum>,
+        player_win_rate_in_fetched_games: String,
+        players_flag_counts: (i32, i32),
+    },
+    RequestFromDatabase {
+        time: String,
+    },
 }
 
 impl ChessDataResponse {
@@ -61,22 +66,57 @@ impl ChessDataResponse {
         let errors_vec =
             deserialization::convert_games_with_errors_to_displayable_format(games_with_errors);
 
-        ChessDataResponse {
-            time,
-            explanation_message,
+        ChessDataResponse::RequestFromFrontend {
+            time: time,
+            explanation_message: explanation_message,
             games_with_errors: errors_vec,
-            trend_chart_data,
-            player_win_rate_in_fetched_games,
-            players_flag_counts,
+            trend_chart_data: trend_chart_data,
+            player_win_rate_in_fetched_games: player_win_rate_in_fetched_games,
+            players_flag_counts: players_flag_counts,
+        }
+    }
+
+    pub fn new_for_db_stats(time: String) -> Self {
+        ChessDataResponse::RequestFromDatabase { time: time }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum RequestSource {
+    Frontend,
+    PythonScript,
+    Other,
+}
+
+impl RequestSource {
+    fn from_str(requested_by: Option<&str>) -> Self {
+        match requested_by {
+            Some("frontend") => RequestSource::Frontend,
+            Some("python-script") => RequestSource::PythonScript,
+            _ => {
+                assert!(
+                    true,
+                    "Request source not recognized. Defaulting to 'frontend'"
+                );
+                RequestSource::Frontend
+            }
         }
     }
 }
 
 #[post("/fetch-chess-data")]
-pub async fn fetch_chess_data(info: web::Json<ChessDataRequest>) -> impl Responder {
+pub async fn fetch_chess_data(
+    info: web::Json<ChessDataRequest>,
+    req: HttpRequest,
+) -> impl Responder {
     let start_time = Instant::now();
+    let requested_by = RequestSource::from_str(
+        req.headers()
+            .get("X-Requested-By")
+            .and_then(|header_value| header_value.to_str().ok()),
+    );
 
-    match lichess_client::fetch_player_data(&info).await {
+    match lichess_client::fetch_player_data(&info, requested_by).await {
         Ok(response) => {
             let end_time = Instant::now();
             let processing_time = end_time.duration_since(start_time).as_secs_f32();
