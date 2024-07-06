@@ -51,6 +51,7 @@ pub enum ChessDataResponse {
     },
     RequestFromDatabase {
         time: String,
+        players_considered: Vec<(String, i32)>,
     },
 }
 
@@ -76,15 +77,18 @@ impl ChessDataResponse {
         }
     }
 
-    pub fn new_for_db_stats(time: String) -> Self {
-        ChessDataResponse::RequestFromDatabase { time: time }
+    pub fn new_internal(time: String, players_considered: Vec<(String, i32)>) -> Self {
+        ChessDataResponse::RequestFromDatabase {
+            time: time,
+            players_considered: players_considered,
+        }
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum RequestSource {
     Frontend,
-    PythonScript,
+    Internal,
     Other,
 }
 
@@ -92,7 +96,7 @@ impl RequestSource {
     fn from_str(requested_by: Option<&str>) -> Self {
         match requested_by {
             Some("frontend") => RequestSource::Frontend,
-            Some("python-script") => RequestSource::PythonScript,
+            Some("python-script") => RequestSource::Internal,
             _ => {
                 assert!(
                     true,

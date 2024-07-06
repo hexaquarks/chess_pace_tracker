@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::deserialization::GameJson;
 use crate::errors_manager::{self, ProcessError};
-use crate::games_info_generator::{self, GameInfo};
+use crate::games_info_generator::{self, get_opponents_and_their_rating, GameInfo};
 use crate::games_info_processor::{
     get_half_time_differentials, process_average_time, process_flag_info, process_win_rate,
 };
@@ -101,13 +101,14 @@ pub async fn handle_successful_response(
     // Note: Average time might be None if 0 games were kept for the computation.
     let average_time = process_average_time(&half_time_differentials);
 
-    // If the request was made by the Python script, we only need to return the average time.
-    if requested_by == RequestSource::PythonScript {
+    // If the request was made internally for statistics, we only need to return the average time.
+    if requested_by == RequestSource::Internal {
         match average_time {
             Some(time) => {
-                return Ok(
-                    HttpResponse::Ok().json(ChessDataResponse::new_for_db_stats(time.to_string()))
-                );
+                return Ok(HttpResponse::Ok().json(ChessDataResponse::new_internal(
+                    time.to_string(),
+                    get_opponents_and_their_rating(&games_info),
+                )));
             }
             None => {
                 return Err(ProcessError::DataError {
