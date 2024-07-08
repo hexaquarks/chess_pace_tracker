@@ -40,6 +40,7 @@ pub struct ChessDataRequest {
 }
 
 #[derive(Serialize)]
+#[serde(untagged)]
 pub enum ChessDataResponse {
     RequestFromFrontend {
         time: String,
@@ -68,19 +69,19 @@ impl ChessDataResponse {
             deserialization::convert_games_with_errors_to_displayable_format(games_with_errors);
 
         ChessDataResponse::RequestFromFrontend {
-            time: time,
-            explanation_message: explanation_message,
+            time,
+            explanation_message,
             games_with_errors: errors_vec,
-            trend_chart_data: trend_chart_data,
-            player_win_rate_in_fetched_games: player_win_rate_in_fetched_games,
-            players_flag_counts: players_flag_counts,
+            trend_chart_data,
+            player_win_rate_in_fetched_games,
+            players_flag_counts,
         }
     }
 
     pub fn new_internal(time: String, players_considered: Vec<(String, i32)>) -> Self {
         ChessDataResponse::RequestFromDatabase {
-            time: time,
-            players_considered: players_considered,
+            time,
+            players_considered,
         }
     }
 }
@@ -89,7 +90,6 @@ impl ChessDataResponse {
 pub enum RequestSource {
     Frontend,
     Internal,
-    Other,
 }
 
 impl RequestSource {
@@ -116,7 +116,7 @@ pub async fn fetch_chess_data(
     let start_time = Instant::now();
     let requested_by = RequestSource::from_str(
         req.headers()
-            .get("X-Requested-By")
+            .get("x-requested-by")
             .and_then(|header_value| header_value.to_str().ok()),
     );
 
