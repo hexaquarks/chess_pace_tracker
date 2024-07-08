@@ -55,7 +55,7 @@ export const sendDataToBackend = async (
       body: JSON.stringify(payload),
       headers: {
         'Content-Type': 'application/json',
-        "X-Requested-By": "frontend"
+        "x-requested-by": "frontend"
       },
     });
 
