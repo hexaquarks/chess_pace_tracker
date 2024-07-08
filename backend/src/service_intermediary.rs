@@ -96,7 +96,7 @@ impl RequestSource {
     fn from_str(requested_by: Option<&str>) -> Self {
         match requested_by {
             Some("frontend") => RequestSource::Frontend,
-            Some("python-script") => RequestSource::Internal,
+            Some("internal") => RequestSource::Internal,
             _ => {
                 assert!(
                     true,
