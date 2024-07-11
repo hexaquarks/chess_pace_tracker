@@ -37,7 +37,6 @@ pub struct ChessDataRequest {
     pub games_count: i32,
     pub game_mode: String,
     pub user_color: String,
-    pub user_elo: Option<i32>, // For internal uses only
 }
 
 #[derive(Serialize)]
@@ -130,7 +129,6 @@ pub async fn fetch_chess_data(
                 info.games_count,
                 info.game_mode.as_str(),
                 info.user_color.as_str(),
-                info.user_elo,
                 processing_time,
             ) {
                 Ok(_) => response,
