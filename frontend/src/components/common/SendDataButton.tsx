@@ -1,4 +1,3 @@
-// components/SendDataButton.tsx
 import React from 'react';
 
 interface SendDataButtonProps {

@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-import UsernameInput from './components/UsernameInput';
-import GamesCountInput from './components/GamesCountInput';
-import GameModeInput from './components/GameModeInput';
-import UserColorInput from './components/UserColorInput';
-import SendDataButton from './components/SendDataButton';
-import { sendDataToBackend, ResponseInformation, MessageInformationAssessment } from './services/apiService';
-import ResponsePanel from './components/ResponsePanel';
-import ErrorsPanel from './components/ErrorsPanel';
-import { FlagPanel, extractFlagginInfoFromResponse } from './components/FlagPanel';
-import WinRateDonutChart from './components/WinRateDonutChart';
-import { DataSeriesChart, convertTrendChartData } from './components/DataSeriesChart';
-import ToastAlertContainer from './components/ToastAlertContainer';
-import { ToastAlertProps} from './components/ToastAlert';
+import { useState } from 'react';
+
+import UsernameInput from './components/inputs/UsernameInput';
+import GamesCountInput from './components/inputs/GamesCountInput';
+import GameModeInput from './components/inputs/GameModeInput';
+import UserColorInput from './components/inputs/UserColorInput';
+import SendDataButton from './components/common/SendDataButton';
+import ResponsePanel from './components/panels/ResponsePanel';
+import ErrorsPanel from './components/panels/ErrorsPanel';
+import WinRateDonutChart from './components/charts/WinRateDonutChart';
+import ToastAlertContainer from './components/notifications/ToastAlertContainer';
 import ClipLoader from "react-spinners/ClipLoader";
+
+import { sendDataToBackend, ResponseInformation } from './services/apiService';
+import { FlagPanel, extractFlagginInfoFromResponse } from './components/panels/FlagPanel';
+import { DataSeriesChart, convertTrendChartData } from './components/charts/DataSeriesChart';
+import { ToastAlertProps} from './components/notifications/ToastAlert';
 
 const App = () => {
   const [username, setUsername] = useState<string>('physicskush');

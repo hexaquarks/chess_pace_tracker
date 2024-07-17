@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import ApexCharts from 'apexcharts';
-import { TrendChartDatum } from '../services/apiService';
+import { TrendChartDatum } from '../../services/apiService';
 
 interface DataSeriesChartProps {
     times: number[],
