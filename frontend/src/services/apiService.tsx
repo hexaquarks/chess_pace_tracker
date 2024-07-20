@@ -26,21 +26,18 @@ interface ResponseInformationInternal {
 	players_flag_counts: [number, number]
 }
 
-export interface ResponseInformation {
-	time: number;
-	explanation_message: [string, MessageInformationAssessment]
-	games_with_errors: Array<[number, string]>
-	trend_chart_data: [TrendChartDatum]
-	player_win_rate_in_fetched_games: number
-	players_flag_counts: [number, number]
+interface UniqueIdentifier {
 	unique_key: number
 }
+
+export type ResponseInformation = ResponseInformationInternal & UniqueIdentifier;
 
 export const sendDataToBackend = async (
 	username: string,
 	gamesCount: number,
 	gameMode: string,
-	userColor: string): Promise<ResponseInformation> => {
+	userColor: string)
+: Promise<Readonly<ResponseInformation>> => {
 	try {
 		const payload: RequestInformation = {
 			username,
@@ -66,17 +63,11 @@ export const sendDataToBackend = async (
 
 		const data: ResponseInformationInternal = await response.json();
 		console.log(data);
-		if (!data.games_with_errors) {
-			console.log("its empt");
-		}
 
-		const uniqueData: ResponseInformation = { ...data, unique_key: Date.now() }
-
-		return uniqueData;
+		return { ...data, unique_key: Date.now() };
 
 	} catch (error) {
 		console.error('Error sending data to backend', error);
-
 		throw error;
 	}
 };

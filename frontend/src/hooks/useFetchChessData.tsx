@@ -12,7 +12,7 @@ const useFetchChessData = () => {
         setError(null);
 
         try {
-            const responseData: ResponseInformation = await sendDataToBackend(
+            const responseData: Readonly<ResponseInformation> = await sendDataToBackend(
                 props.username,
                 props.gamesCount,
                 props.gameMode,
