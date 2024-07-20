@@ -5,7 +5,7 @@ from typing import List, Tuple, Dict, Any, Set
 from enum import Enum
 
 BIND_ADDRESS: str = "http://localhost:8000/fetch-chess-data"
-N_USERS_TO_PROCESS_FOR_GAME_MODE: int = 5
+N_USERS_TO_PROCESS_FOR_GAME_MODE: int = 20
 
 class GameMode(Enum):
     BLITZ = 'blitz'
@@ -48,6 +48,28 @@ class ELOBraketsCache:
                 self.braket_info_impl["2000-2400"] += 1
             case _:
                 print(f"ELO rating {elo_rating} is out of defined brackets.")
+    
+    def get_next_user_rating_pair(self, user_rating_pairs: List[UserRatingPair]) -> UserRatingPair:
+        sorted_brackets = sorted(self.braket_info_impl.items(), key=lambda x: x[1])
+        
+        bracket_ranges = {
+            "0-400": (0, 400),
+            "400-800": (400, 800),
+            "800-1200": (800, 1200),
+            "1200-1600": (1200, 1600),
+            "1600-2000": (1600, 2000),
+            "2000-2400": (2000, 2400),
+        }
+
+        for bracket, _ in sorted_brackets:
+            lower_bound, upper_bound = bracket_ranges[bracket]
+            for i, user_info in enumerate(user_rating_pairs):
+                if lower_bound <= user_info.elo_rating < upper_bound:
+                    # We remove the user from the list since we don't want to process twice
+                    return user_rating_pairs.pop(i)
+                
+        # Default on the last user in the list
+        return user_rating_pairs.pop()
 
 @dataclass
 class BackendRequestPayload:
@@ -140,6 +162,9 @@ class Processor:
                 print(f"A server error occurred while trying to process user {user_name}: {e}")
                 raise
             
+        def get_next_user_rating_pair(self, user_rating_pairs: List[UserRatingPair]) -> UserRatingPair:
+            return self.elo_braket_info.get_next_user_rating_pair(user_rating_pairs)
+            
         def process_users_for_game_mode(self):
             # Reset timer
             start_time = time.time()
@@ -153,7 +178,7 @@ class Processor:
                 
                 self.nb_total_considered_users_for_curr_game_mode += 1
                 
-                user_info = user_rating_pairs.pop()
+                user_info: UserRatingPair = self.get_next_user_rating_pair(user_rating_pairs)
                 user_name = user_info.user_name
                 
                 if user_name in self.processed_users:

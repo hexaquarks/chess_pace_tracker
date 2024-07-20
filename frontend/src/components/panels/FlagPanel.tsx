@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import ApexCharts from 'apexcharts';
 
-import { ResponseInformation } from '../services/apiService';
+import { ResponseInformation } from '../../services/apiService';
 
 interface FlagPanelProps {
     userFlagCount: number,
