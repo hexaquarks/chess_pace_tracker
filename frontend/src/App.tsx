@@ -1,38 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import ResponsePanel from './components/panels/ResponsePanel';
 import ErrorsPanel from './components/panels/ErrorsPanel';
 import WinRateDonutChart from './components/charts/WinRateDonutChart';
 import ToastAlertContainer from './components/notifications/ToastAlertContainer';
 import ClipLoader from "react-spinners/ClipLoader";
-import { InputsPanel, InputProps } from "./components/panels/InputsPanel";
 
-import { sendDataToBackend, ResponseInformation } from './services/apiService';
+import { InputsPanel } from "./components/panels/InputsPanel";
+import { ChessDataProvider, useChessData } from './context/ChessDataContext';
 import { FlagPanel, extractFlagginInfoFromResponse } from './components/panels/FlagPanel';
 import { DataSeriesChart, convertTrendChartData } from './components/charts/DataSeriesChart';
 import { ToastAlertProps } from './components/notifications/ToastAlert';
 
-const App = () => {
-	const [response, setResponse] = useState<ResponseInformation | null>(null);
+const AppContent: React.FC = () => {
+	const { response, isLoading, error, fetchData } = useChessData();
 	const [toasts, setToasts] = useState<ToastAlertProps[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-
-	const handleSendData = async (props: InputProps) => {
-		console.log("in here ")
-		try {
-			setIsLoading(true);
-			const responseData: ResponseInformation = await sendDataToBackend(
-				props.username,
-				props.gamesCount,
-				props.gameMode,
-				props.userColor);
-			setResponse(responseData);
-		} catch (error) {
-			addToast(error instanceof Error ? error.message : 'An unexpected error occurred');
-		} finally {
-			setIsLoading(false);
-		}
-	};
 
 	const removeToast = (id: number) => {
 		setToasts((prevToasts: ToastAlertProps[]) => prevToasts.filter((toast) => toast.id !== id));
@@ -42,6 +24,12 @@ const App = () => {
 		const newToast: ToastAlertProps = { id: Date.now(), message, removeToast };
 		setToasts((prevToasts: ToastAlertProps[]) => [...prevToasts, newToast]);
 	};
+
+	useEffect(() => {
+		if (error) {
+			addToast(error);
+		}
+	}, [error]);
 
 	return (
 		<div>
@@ -54,7 +42,7 @@ const App = () => {
 			<div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">
 				<div className="flex flex-row justify-center w-full max-w-7xl">
 					<div className="flex flex-col w-full max-w-2xl px-4">
-						<InputsPanel handleSendData={handleSendData} />
+						<InputsPanel handleSendData={fetchData} />
 						{
 							response && (
 								<div>
@@ -86,6 +74,14 @@ const App = () => {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+const App = () => {
+	return (
+		<ChessDataProvider>
+			<AppContent />
+		</ChessDataProvider>
 	);
 }
 
