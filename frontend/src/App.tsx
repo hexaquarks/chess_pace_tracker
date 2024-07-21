@@ -13,7 +13,7 @@ import { DataSeriesChart, convertTrendChartData } from './components/charts/Data
 import { ToastAlertProps } from './components/notifications/ToastAlert';
 
 const AppContent: React.FC = () => {
-	const { response, isLoading, error, fetchData } = useChessData();
+	const { response, isLoading, error, fetchData, usernameNotFound } = useChessData();
 	const [toasts, setToasts] = useState<ToastAlertProps[]>([]);
 
 	const removeToast = (id: number) => {
@@ -42,7 +42,7 @@ const AppContent: React.FC = () => {
 			<div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">
 				<div className="flex flex-row justify-center w-full max-w-7xl">
 					<div className="flex flex-col w-full max-w-2xl px-4">
-						<InputsPanel handleSendData={fetchData} />
+						<InputsPanel handleSendData={fetchData} usernameNotFound={usernameNotFound} />
 						{
 							response && (
 								<div>

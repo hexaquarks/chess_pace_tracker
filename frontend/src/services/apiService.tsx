@@ -1,3 +1,5 @@
+import { STATUS_CODES } from "http";
+
 interface RequestInformation {
 	username: string;
 	games_count: number;
@@ -36,7 +38,9 @@ export const sendDataToBackend = async (
 	username: string,
 	gamesCount: number,
 	gameMode: string,
-	userColor: string)
+	userColor: string,
+	setUsernameNotFound: (e: boolean) => void
+)
 : Promise<Readonly<ResponseInformation>> => {
 	try {
 		const payload: RequestInformation = {
@@ -57,8 +61,10 @@ export const sendDataToBackend = async (
 		});
 
 		if (!response.ok) {
-			const errorResponse = await response.json();
-			throw new Error(errorResponse.error || `HTTP error! status: ${response.status}`);
+			const errorStatus = await response.status;
+			handleErrorResponse(errorStatus, setUsernameNotFound);
+		} else {
+			setUsernameNotFound(false);
 		}
 
 		const data: ResponseInformationInternal = await response.json();
@@ -70,4 +76,27 @@ export const sendDataToBackend = async (
 		console.error('Error sending data to backend', error);
 		throw error;
 	}
-};
+}
+
+const handleErrorResponse = (
+	status: number, 
+	setUsernameNotFound: (e: boolean) => void
+) => {
+    switch (status) {
+        case 400:
+			throw new Error(`The request was invalid with status ${status}.`);
+        case 401:
+			throw new Error('Unauthorized');
+        case 403:
+			throw new Error('You do not have permission to access this resource.');
+        case 404:
+			setUsernameNotFound(true);
+			throw new Error(`The username was not found. Make sure the username is correct and try again.`);
+        case 500:
+			throw new Error('An internal server error occured. Please try again later.');
+        case 503:
+			throw new Error('The service is unavailable right now. Please try again later.');
+        default:
+			throw new Error(`An unexpected error occured with status: ${status}.`);
+    }
+}

@@ -6,17 +6,19 @@ const useFetchChessData = () => {
     const [response, setResponse] = useState<ResponseInformation | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [usernameNotFound, setUsernameNotFound] = useState(false);
 
     const fetchData = async (props: InputProps) => {
         setIsLoading(true);
         setError(null);
-
+        
         try {
             const responseData: Readonly<ResponseInformation> = await sendDataToBackend(
                 props.username,
                 props.gamesCount,
                 props.gameMode,
-                props.userColor
+                props.userColor,
+                setUsernameNotFound
             );
             setResponse(responseData);
         } catch (error) {
@@ -26,7 +28,7 @@ const useFetchChessData = () => {
         }
     };
 
-    return { response, isLoading, error, fetchData };
+    return { response, isLoading, error, fetchData, usernameNotFound };
 };
 
 export default useFetchChessData;

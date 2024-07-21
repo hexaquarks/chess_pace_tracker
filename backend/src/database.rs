@@ -1,4 +1,4 @@
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Connection, Result, ToSql};
 
 pub fn create_database() -> Result<()> {
     let connection = Connection::open("request_timing_data.db")?;
@@ -32,7 +32,7 @@ pub fn log_request_data(
             games_count,
             game_mode,
             user_color,
-            user_elo.as_ref().unwrap(),
+            user_elo.as_ref().map(|&v| v as i64).to_sql()?,
             processing_time
         ],
     )?;

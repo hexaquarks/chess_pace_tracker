@@ -14,7 +14,7 @@ use crate::service_intermediary::{
 use crate::trend_chart_generator;
 use crate::util;
 
-use actix_web::HttpResponse;
+use actix_web::{Error, HttpResponse};
 use futures_util::TryStreamExt;
 use reqwest::Response;
 use serde_json;
@@ -41,7 +41,7 @@ pub async fn process_response_stream(
     request_data: &ChessDataRequest,
     request_response: Response,
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
-) -> Result<(), ProcessError> {
+) -> Result<(), Error> {
     let games_info_arc = Arc::new(Mutex::new(games_info));
     let skipped_games_arc = Arc::new(Mutex::new(skipped_games));
     let mut game_idx = 0;
@@ -75,18 +75,22 @@ pub async fn process_response_stream(
             }
         })
         .await
-        .map_err(|_| ProcessError::InternalError {
-            message: "An error occurred while fetching player data.".into(),
+        .map_err(|e| {
+            actix_web::error::ErrorInternalServerError(format!(
+                "A critical error occurred while fetching player data: {:?}",
+                e
+            ))
         })?;
 
     Ok(())
 }
 
+// TODO add specializations for this function
 pub async fn handle_successful_response(
     request_data: &ChessDataRequest,
     requested_by: RequestSource,
     response: Response,
-) -> Result<HttpResponse, ProcessError> {
+) -> Result<HttpResponse, Error> {
     let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
     let mut games_info: Vec<GameInfo> = Vec::new();
 
@@ -111,9 +115,9 @@ pub async fn handle_successful_response(
                 )));
             }
             None => {
-                return Err(ProcessError::DataError {
-                    message: "Data processing was incomplete for the requested sample.".into(),
-                });
+                return Err(actix_web::error::ErrorInternalServerError(
+                    "Data processing was incomplete for the requested sample.",
+                ));
             }
         }
     }
@@ -148,21 +152,28 @@ pub async fn handle_successful_response(
 pub async fn fetch_player_data(
     request_data: &ChessDataRequest,
     requested_by: RequestSource,
-) -> Result<HttpResponse, ProcessError> {
+) -> Result<HttpResponse, Error> {
     let url = get_url(&request_data);
     let client = reqwest::Client::new();
+
     let response = client
         .get(&url)
         .header("Accept", "application/x-ndjson")
         .send()
         .await
-        .map_err(ProcessError::from)?;
+        .map_err(|e| {
+            actix_web::error::ErrorInternalServerError(format!("Request error: {:?}", e))
+        })?;
 
     if response.status().is_success() {
+        println!("Request to Lichess API successful");
         handle_successful_response(request_data, requested_by, response).await
     } else {
-        Err(ProcessError::FetchError {
-            message: "There was a problem fetching the data".into(),
-        })
+        let status = response.status();
+        let error_message = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "Unknown error".to_string());
+        Ok(HttpResponse::build(status).json(serde_json::json!({ "error": error_message })))
     }
 }
