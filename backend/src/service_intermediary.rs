@@ -5,7 +5,9 @@ use crate::database;
 use crate::deserialization;
 use crate::lichess_client;
 use crate::trend_chart_generator::TrendChartDatum;
+use crate::websocket::WebSocketSession;
 
+use actix::Addr;
 use actix_web::ResponseError;
 use actix_web::{http::header, post, web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
@@ -121,7 +123,11 @@ pub async fn fetch_chess_data(
             .and_then(|header_value| header_value.to_str().ok()),
     );
 
-    match lichess_client::fetch_player_data(&info, requested_by).await {
+    let websocket_addr = req
+        .app_data::<Addr<WebSocketSession>>()
+        .expect("WebSocket address missing");
+
+    match lichess_client::fetch_player_data(&info, requested_by, websocket_addr).await {
         Ok(response) => {
             let end_time = Instant::now();
             let processing_time = end_time.duration_since(start_time).as_secs_f32();

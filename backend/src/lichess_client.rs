@@ -1,5 +1,5 @@
+use actix::Addr;
 use std::collections::HashMap;
-use std::sync::Arc;
 
 use crate::deserialization::GameJson;
 use crate::errors_manager::{self, ProcessError};
@@ -13,11 +13,13 @@ use crate::service_intermediary::{
 };
 use crate::trend_chart_generator;
 use crate::util;
+use crate::websocket::WebSocketSession;
 
 use actix_web::{Error, HttpResponse};
 use futures_util::TryStreamExt;
 use reqwest::Response;
 use serde_json;
+use std::sync::Arc;
 use tokio::sync::Mutex;
 
 pub fn get_url(request_data: &ChessDataRequest) -> String {
@@ -41,6 +43,7 @@ pub async fn process_response_stream(
     request_data: &ChessDataRequest,
     request_response: Response,
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
+    websocket_addr: &Addr<WebSocketSession>,
 ) -> Result<(), Error> {
     let games_info_arc = Arc::new(Mutex::new(games_info));
     let skipped_games_arc = Arc::new(Mutex::new(skipped_games));
@@ -62,6 +65,14 @@ pub async fn process_response_stream(
                             &game_idx,
                             &username.to_string(),
                         ));
+
+                        // Notify client that one of the games requested has been processed
+                        // (for loading bar).
+                        util::send_websocket_message(
+                            websocket_addr,
+                            game_idx,
+                            request_data.games_count,
+                        );
                     }
                     Err(_) => {
                         let mut lock = skipped_games_ref.lock().await;
@@ -90,12 +101,20 @@ pub async fn handle_successful_response(
     request_data: &ChessDataRequest,
     requested_by: RequestSource,
     response: Response,
+    websocket_addr: &Addr<WebSocketSession>,
 ) -> Result<HttpResponse, Error> {
     let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
     let mut games_info: Vec<GameInfo> = Vec::new();
 
     // =========== STEP 1: Process the response stream ===========
-    process_response_stream(&mut games_info, request_data, response, &mut skipped_games).await?;
+    process_response_stream(
+        &mut games_info,
+        request_data,
+        response,
+        &mut skipped_games,
+        websocket_addr,
+    )
+    .await?;
 
     // =========== STEP 2: Get the half time differentials ===========
     let half_time_differentials: Vec<f32> =
@@ -152,6 +171,7 @@ pub async fn handle_successful_response(
 pub async fn fetch_player_data(
     request_data: &ChessDataRequest,
     requested_by: RequestSource,
+    websocket_addr: &Addr<WebSocketSession>,
 ) -> Result<HttpResponse, Error> {
     let url = get_url(&request_data);
     let client = reqwest::Client::new();
@@ -166,8 +186,7 @@ pub async fn fetch_player_data(
         })?;
 
     if response.status().is_success() {
-        println!("Request to Lichess API successful");
-        handle_successful_response(request_data, requested_by, response).await
+        handle_successful_response(request_data, requested_by, response, websocket_addr).await
     } else {
         let status = response.status();
         let error_message = response

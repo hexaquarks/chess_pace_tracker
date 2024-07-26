@@ -1,7 +1,9 @@
+use actix::Addr;
 use std::collections::HashMap;
 
 use crate::games_info_generator::{GameInfo, TimedMove};
 use crate::service_intermediary::GameFetchWarning;
+use crate::websocket::{WebSocketSession, WebSocketTextMessage};
 
 pub fn compute_average(times: &[f32]) -> f32 {
     (times.iter().sum::<f32>() / times.len() as f32) as f32
@@ -54,4 +56,13 @@ pub fn get_game_flagging_information(game: &GameInfo) -> Option<bool> {
     }
 
     None
+}
+
+pub fn send_websocket_message(
+    websocket_addr: &Addr<WebSocketSession>,
+    game_idx: usize,
+    games_count: i32,
+) {
+    let message = WebSocketTextMessage(format!("Game {}/{}", game_idx + 1, games_count));
+    websocket_addr.do_send(message);
 }
