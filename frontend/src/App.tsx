@@ -5,6 +5,7 @@ import ErrorsPanel from './components/panels/ErrorsPanel';
 import WinRateDonutChart from './components/charts/WinRateDonutChart';
 import ToastAlertContainer from './components/notifications/ToastAlertContainer';
 import ClipLoader from "react-spinners/ClipLoader";
+import LoadingBar from './components/notifications/LoadingBar'
 
 import { InputsPanel } from "./components/panels/InputsPanel";
 import { ChessDataProvider, useChessData } from './context/ChessDataContext';
@@ -34,9 +35,10 @@ const AppContent: React.FC = () => {
 	return (
 		<div>
 			{isLoading && (
-				<div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-					<ClipLoader color="#FFFFFF" loading={isLoading} size={75} />
-				</div>
+				// <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+				// 	<ClipLoader color="#FFFFFF" loading={isLoading} size={75} />
+				// </div>
+				<LoadingBar />
 			)}
 			<ToastAlertContainer toasts={toasts} removeToast={removeToast} />
 			<div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">
