@@ -4,11 +4,18 @@ use actix_web::{web, Error, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 use std::time::{Duration, Instant};
 
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+
+lazy_static! {
+    pub static ref WEBSOCKET_ADDR: Mutex<Option<Addr<WebSocketSession>>> = Mutex::new(None);
+}
+
 /// How often heartbeat pings are sent
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 
-#[derive(Message)]
+#[derive(Message, Debug)]
 #[rtype(result = "()")]
 pub struct WebSocketTextMessage(pub String);
 
@@ -71,5 +78,17 @@ pub async fn add_websocket_endpoint(
     request: HttpRequest,
     stream: web::Payload,
 ) -> Result<HttpResponse, Error> {
-    ws::start(WebSocketSession::new(), &request, stream)
+    println!("WebSocket endpoint hit");
+    let ws_session = WebSocketSession::new();
+    let (addr, response) =
+        ws::WsResponseBuilder::new(ws_session, &request, stream).start_with_addr()?;
+
+    // Store the WebSocket address in the global variable
+    {
+        println!("Storing WebSocket address");
+        let mut websocket_addr = WEBSOCKET_ADDR.lock().unwrap();
+        *websocket_addr = Some(addr);
+    }
+
+    Ok(response)
 }

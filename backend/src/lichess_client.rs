@@ -13,7 +13,7 @@ use crate::service_intermediary::{
 };
 use crate::trend_chart_generator;
 use crate::util;
-use crate::websocket::WebSocketSession;
+use crate::websocket::{WebSocketSession, WebSocketTextMessage};
 
 use actix_web::{Error, HttpResponse};
 use futures_util::TryStreamExt;
@@ -45,43 +45,53 @@ pub async fn process_response_stream(
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
     websocket_addr: &Addr<WebSocketSession>,
 ) -> Result<(), Error> {
-    let games_info_arc = Arc::new(Mutex::new(games_info));
-    let skipped_games_arc = Arc::new(Mutex::new(skipped_games));
-    let mut game_idx = 0;
-
+    let games_info_arc = Arc::new(tokio::sync::Mutex::new(games_info));
+    let skipped_games_arc = Arc::new(tokio::sync::Mutex::new(skipped_games));
+    let websocket_addr_arc = Arc::new(tokio::sync::Mutex::new(websocket_addr.clone()));
+    let game_idx_arc = Arc::new(tokio::sync::Mutex::new(0));
     let stream = request_response.bytes_stream();
-    let username = request_data.username.as_str();
+    let username = request_data.username.clone();
+
     stream
         .try_for_each_concurrent(None, move |game_bytes| {
             let games_info_ref = games_info_arc.clone();
             let skipped_games_ref = skipped_games_arc.clone();
+            let websocket_addr_ref = websocket_addr_arc.clone();
+            let game_idx_ref = game_idx_arc.clone();
+            let username = username.clone();
 
             async move {
                 match serde_json::from_slice::<GameJson>(&game_bytes) {
                     Ok(game_json) => {
-                        let mut lock = games_info_ref.lock().await;
-                        lock.push(games_info_generator::generate(
+                        let mut games_info_lock = games_info_ref.lock().await;
+                        let mut game_idx_lock = game_idx_ref.lock().await;
+                        games_info_lock.push(games_info_generator::generate(
                             &game_json,
-                            &game_idx,
-                            &username.to_string(),
+                            &game_idx_lock,
+                            &username,
                         ));
 
                         // Notify client that one of the games requested has been processed
                         // (for loading bar).
+                        let mut websocket_addr_lock = websocket_addr_ref.lock().await.clone();
                         util::send_websocket_message(
-                            websocket_addr,
-                            game_idx,
-                            request_data.games_count,
+                            &mut websocket_addr_lock,
+                            &game_idx_lock.clone(),
+                            &request_data.games_count,
                         );
+
+                        *game_idx_lock += 1;
                     }
                     Err(_) => {
-                        let mut lock = skipped_games_ref.lock().await;
-                        lock.entry(game_idx).or_insert_with(|| {
+                        let mut skipped_games_lock = skipped_games_ref.lock().await;
+                        let mut game_idx_lock = game_idx_ref.lock().await;
+                        skipped_games_lock.entry(*game_idx_lock).or_insert_with(|| {
                             GameFetchWarning::InternalErrorOccuredWhileProcessingAGame
                         });
+
+                        *game_idx_lock += 1;
                     }
                 }
-                game_idx += 1;
                 Ok(())
             }
         })

@@ -39,7 +39,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .service(service_intermediary::fetch_chess_data)
-            .route("/ws/", web::get().to(websocket::add_websocket_endpoint))
+            .service(web::resource("/ws").route(web::get().to(websocket::add_websocket_endpoint)))
+            .wrap(middleware::Logger::default())
     })
     .bind(BIND_ADDRESS)?
     .run()

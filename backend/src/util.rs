@@ -59,10 +59,11 @@ pub fn get_game_flagging_information(game: &GameInfo) -> Option<bool> {
 }
 
 pub fn send_websocket_message(
-    websocket_addr: &Addr<WebSocketSession>,
-    game_idx: usize,
-    games_count: i32,
+    websocket_addr_lock: &mut Addr<WebSocketSession>,
+    game_idx: &usize,
+    games_count: &i32,
 ) {
     let message = WebSocketTextMessage(format!("Game {}/{}", game_idx + 1, games_count));
-    websocket_addr.do_send(message);
+
+    websocket_addr_lock.do_send(message);
 }
