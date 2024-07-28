@@ -5,6 +5,7 @@ import ErrorsPanel from './components/panels/ErrorsPanel';
 import WinRateDonutChart from './components/charts/WinRateDonutChart';
 import ToastAlertContainer from './components/notifications/ToastAlertContainer';
 import ClipLoader from "react-spinners/ClipLoader";
+import LoadingBar from './components/notifications/LoadingBar'
 
 import { InputsPanel } from "./components/panels/InputsPanel";
 import { ChessDataProvider, useChessData } from './context/ChessDataContext';
@@ -13,7 +14,7 @@ import { DataSeriesChart, convertTrendChartData } from './components/charts/Data
 import { ToastAlertProps } from './components/notifications/ToastAlert';
 
 const AppContent: React.FC = () => {
-	const { response, isLoading, error, fetchData, usernameNotFound } = useChessData();
+	const { response, isLoading, error, fetchData, usernameNotFound, fetchProgress } = useChessData();
 	const [toasts, setToasts] = useState<ToastAlertProps[]>([]);
 
 	const removeToast = (id: number) => {
@@ -31,11 +32,13 @@ const AppContent: React.FC = () => {
 		}
 	}, [error]);
 
+	
 	return (
 		<div>
 			{isLoading && (
 				<div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
 					<ClipLoader color="#FFFFFF" loading={isLoading} size={75} />
+					<LoadingBar progress={fetchProgress}/>
 				</div>
 			)}
 			<ToastAlertContainer toasts={toasts} removeToast={removeToast} />

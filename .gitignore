@@ -3,3 +3,5 @@ frontend/node_modules
 backend/target
 backend/keys.toml
 backend/request_timing_data.db
+package.json
+package-lock.json
