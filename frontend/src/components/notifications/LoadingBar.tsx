@@ -1,13 +1,14 @@
 import React from 'react';
-import useWebSocketHook from '../../hooks/useWebSocketHook';
 
-const LoadingBar = () => {
-    const { progress } = useWebSocketHook();
+interface LoadingBarProps {
+    progress: string;
+}
 
+const LoadingBar: React.FC<LoadingBarProps> = ({ progress }) => {
     return (
         <div>
-            <h3>Loading Games</h3>
-            <div>{progress}</div>
+            <h3 color="#FFFFFF">Loading Games</h3>
+            <div color="#FFFFFF">{progress}</div>
         </div>
     );
 };

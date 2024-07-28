@@ -13,7 +13,7 @@ export interface InputProps {
 }
 
 interface InputPanelProps {
-    handleSendData: (props: InputProps) => Promise<void>;
+    handleSendData: (props: InputProps) => void;
     usernameNotFound: boolean;
 }
 

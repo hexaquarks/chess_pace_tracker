@@ -14,7 +14,7 @@ import { DataSeriesChart, convertTrendChartData } from './components/charts/Data
 import { ToastAlertProps } from './components/notifications/ToastAlert';
 
 const AppContent: React.FC = () => {
-	const { response, isLoading, error, fetchData, usernameNotFound } = useChessData();
+	const { response, isLoading, error, fetchData, usernameNotFound, fetchProgress } = useChessData();
 	const [toasts, setToasts] = useState<ToastAlertProps[]>([]);
 
 	const removeToast = (id: number) => {
@@ -32,13 +32,14 @@ const AppContent: React.FC = () => {
 		}
 	}, [error]);
 
+	
 	return (
 		<div>
 			{isLoading && (
-				// <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-				// 	<ClipLoader color="#FFFFFF" loading={isLoading} size={75} />
-				// </div>
-				<LoadingBar />
+				<div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+					<ClipLoader color="#FFFFFF" loading={isLoading} size={75} />
+					<LoadingBar progress={fetchProgress}/>
+				</div>
 			)}
 			<ToastAlertContainer toasts={toasts} removeToast={removeToast} />
 			<div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">

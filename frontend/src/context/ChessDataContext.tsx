@@ -7,17 +7,18 @@ interface ChessDataContextProps {
     response: ResponseInformation | null;
     isLoading: boolean;
     error: string | null;
-    fetchData: (props: InputProps) => Promise<void>;
+    fetchData: (props: InputProps) => void;
     usernameNotFound: boolean;
+    fetchProgress: string;
 }
 
 const ChessDataContext = createContext<ChessDataContextProps | undefined>(undefined);
 
 export const ChessDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { response, isLoading, error, fetchData, usernameNotFound } = useFetchChessData();
+    const { response, isLoading, error, fetchData, usernameNotFound, fetchProgress } = useFetchChessData();
 
     return (
-        <ChessDataContext.Provider value={{ response, isLoading, error, fetchData, usernameNotFound }}>
+        <ChessDataContext.Provider value={{ response, isLoading, error, fetchData, usernameNotFound, fetchProgress }}>
             {children}
         </ChessDataContext.Provider>
     );

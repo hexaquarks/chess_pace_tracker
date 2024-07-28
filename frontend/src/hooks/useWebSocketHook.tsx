@@ -1,18 +1,39 @@
 import { useState, useEffect } from 'react';
-import useWebSocket from 'react-use-websocket';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 
-const useWebSocketHook = () => {
-    const [progress, setProgress] = useState<string>('');
+interface WebSocketHookProps {
+    setFetchProgress: (fetchProgress: string) => void;
+    shouldConnectToWebsocket: boolean;
+}
+const useWebSocketHook = ({setFetchProgress, shouldConnectToWebsocket }: WebSocketHookProps) => {
+    const [isWebsocketConnected, setIsWebsocketConnected] = useState(false);
 
-    const { sendMessage, lastMessage, readyState } = useWebSocket('http://localhost:8080/ws');
+    const END_POINT: string = 'ws://localhost:8000/ws';
+
+    const { sendMessage, lastMessage, readyState, getWebSocket } = useWebSocket(END_POINT, {
+        shouldReconnect: () => false, // No need, the life time of the WebSocket connection will be handled manually.
+        onOpen: () => setIsWebsocketConnected(true),
+        onClose: () => setIsWebsocketConnected(false),
+        onMessage: (message) => setFetchProgress(message.data),
+        share: true,
+    }, shouldConnectToWebsocket);
+
+    useEffect(() => {
+        setIsWebsocketConnected(readyState === ReadyState.OPEN);
+    }, [readyState as ReadyState]);
 
     useEffect(() => {
         if (lastMessage !== null) {
-            setProgress(lastMessage.data);
+            // console.log('Received WebSocket message:', lastMessage.data);
+            setFetchProgress(lastMessage.data);
         }
     }, [lastMessage]);
 
-    return { progress };
+    const closeWebsocketConnection = () => {
+        getWebSocket()?.close();
+    };
+
+    return { isWebsocketConnected, closeWebsocketConnection };
 };
 
 export default useWebSocketHook;
