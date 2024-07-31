@@ -37,7 +37,7 @@ const AppContent: React.FC = () => {
 		<div>
 			{isLoading && (
 				<div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-					<ClipLoader color="#FFFFFF" loading={isLoading} size={75} />
+					{/* <ClipLoader color="#FFFFFF" loading={isLoading} size={75} /> */}
 					<LoadingBar progress={fetchProgress}/>
 				</div>
 			)}
