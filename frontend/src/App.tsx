@@ -16,6 +16,7 @@ import { ToastAlertProps } from './components/notifications/ToastAlert';
 const AppContent: React.FC = () => {
 	const { response, isLoading, error, fetchData, usernameNotFound, fetchProgress } = useChessData();
 	const [toasts, setToasts] = useState<ToastAlertProps[]>([]);
+	const [showLoading, setShowLoading] = useState(false);
 
 	const removeToast = (id: number) => {
 		setToasts((prevToasts: ToastAlertProps[]) => prevToasts.filter((toast) => toast.id !== id));
@@ -32,10 +33,18 @@ const AppContent: React.FC = () => {
 		}
 	}, [error]);
 
-	
+	// Implementation to ensure that the loading bar is shown for at least 1 second after response 
+	useEffect(() => {
+        if (isLoading) {
+            setShowLoading(true);
+        } else if (!isLoading && response) {
+            setTimeout(() => setShowLoading(false), 750); 
+        }
+    }, [isLoading, response]);
+
 	return (
 		<div>
-			{isLoading && (
+			{showLoading && (
 				<div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
 					{/* <ClipLoader color="#FFFFFF" loading={isLoading} size={75} /> */}
 					<LoadingBar progress={fetchProgress}/>
