@@ -50,54 +50,56 @@ const AppContent: React.FC = () => {
 					<LoadingBar progress={fetchProgress} />
 				</div>
 			)}
-			<ToastAlertContainer 
-				toasts={toasts} 
+			<ToastAlertContainer
+				toasts={toasts}
 				removeToast={removeToast}
 			/>
-			{/* Main page  */}
-			<div className="flex flex-col items-center bg-zinc-900 pt-20 pb-8 min-h-screen"> 
-				{/* Components dic */}
-				<div className="flex flex-row justify-center w-full max-w-7xl">
+
+			{/* Main page */}
+			<div className="flex flex-col items-center bg-zinc-900 pt-20 pb-8 min-h-screen sm:px-20 px-3">
+				{/* Components container */}
+				<div className="flex flex-col lg:flex-row justify-center w-full max-w-7xl">
 					{/* Left column with components */}
-					<div className="w-3/4 max-w-2xl px-4">
-						<InputsPanel 
-							handleSendData={fetchData} 
-							usernameNotFound={usernameNotFound} 
+					<div className="w-full lg:w-3/4 lg:max-w-2xl px-4">
+						<InputsPanel
+							handleSendData={fetchData}
+							usernameNotFound={usernameNotFound}
 						/>
-						{
-							response && (
-								<div>
-									<ResponsePanel
-										time={response.time}
-										explanationMessage={response.explanation_message}
-									/>
-									<DataSeriesChart 
-										key={response.unique_key} 
-										{...convertTrendChartData(response.trend_chart_data)}
-									/>
-								</div>
-							)
-						}
+						{response && (
+							<div>
+								<ResponsePanel
+									time={response.time}
+									explanationMessage={response.explanation_message}
+								/>
+								<DataSeriesChart
+									key={response.unique_key}
+									{...convertTrendChartData(response.trend_chart_data)}
+								/>
+							</div>
+						)}
 					</div>
 
 					{/* Right column with components */}
 					{response && (
-						<div className="w-1/4">
+						<div className="w-full lg:w-1/4 px-4 lg:px-0">
 							<ErrorsPanel
 								gamesWithError={response.games_with_errors}
 								totalNumberOfGames={response.games_with_errors.length} // temporary
 							/>
-							<WinRateDonutChart 
-								winRate={response.player_win_rate_in_fetched_games} 
-							/>
-							<FlagPanel 
-								key={response.unique_key} 
-								{...extractFlagginInfoFromResponse(response)} 
+							<div className="w-full max-w-sm mx-auto lg:py-0 pt-10"> {/* Centering the Donut chart with max width */}
+								<WinRateDonutChart
+									winRate={response.player_win_rate_in_fetched_games}
+								/>
+							</div>
+							<FlagPanel
+								key={response.unique_key}
+								{...extractFlagginInfoFromResponse(response)}
 							/>
 						</div>
 					)}
 				</div>
 			</div>
+
 		</div>
 	);
 }
