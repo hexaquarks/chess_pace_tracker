@@ -78,7 +78,6 @@ const WinRateDonutChart: React.FC<WinRateDonutChartProps> = ({ winRate }) => {
             },
             responsive: [
                 {
-                    breakpoint: 480,
                     options: {
                         chart: {
                             width: 200

@@ -15,7 +15,7 @@ const iconStyles = [
 const ResponsePanel: React.FC<ResponsePanelProps> = ({ time, explanationMessage }) => {
 
   const [message, assessment] = explanationMessage;
-  const iconSize = 'h-20 w-20';
+  const iconSize = 'h-12 sm:h-20 w-12 sm:w-20';
 
   const IconGetter = () => {
     switch (assessment) {
@@ -27,16 +27,21 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ time, explanationMessage 
   };
 
   return (
-    <div className="flex items-center space-x-2 rounded-lg bg-gray-800 text-white w-full">
-      <div className="flex-shrink-0">
+    <div className="bg-gray-800 p-5 items-center rounded-lg flex space-x-3 text-white w-full">
+      <div className="">
         <IconGetter />
       </div>
-      <div className="flex-grow">
-        <p className="text-lg font-semibold">{message}</p>
-        <p>{`Time: ${time}s`}</p>
+      <div className="flex-col">
+        <p className="text-xs xs:text-sm sm:text-md md:text-lg font-semibold pb-2">
+          {message}
+        </p>
+        <p className="text-xs xs:text-sm sm:text-md md:text-lg">
+          {`Time: ${time}s`}
+        </p>
       </div>
     </div>
   );
+  
 };
 
 export default ResponsePanel;

@@ -35,56 +35,71 @@ const AppContent: React.FC = () => {
 
 	// Implementation to ensure that the loading bar is shown for at least 1 second after response 
 	useEffect(() => {
-        if (isLoading) {
-            setShowLoading(true);
-        } else if (!isLoading && response) {
-            setTimeout(() => setShowLoading(false), 750); 
-        }
-    }, [isLoading, response]);
+		if (isLoading) {
+			setShowLoading(true);
+		} else if (!isLoading && response) {
+			setTimeout(() => setShowLoading(false), 750);
+		}
+	}, [isLoading, response]);
 
 	return (
 		<div>
 			{showLoading && (
 				<div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
 					{/* <ClipLoader color="#FFFFFF" loading={isLoading} size={75} /> */}
-					<LoadingBar progress={fetchProgress}/>
+					<LoadingBar progress={fetchProgress} />
 				</div>
 			)}
-			<ToastAlertContainer toasts={toasts} removeToast={removeToast} />
-			<div className="flex flex-col items-center justify-between w-screen bg-zinc-900 pt-20 pb-8 min-h-screen">
-				<div className="flex flex-row justify-center w-full max-w-7xl">
-					<div className="flex flex-col w-full max-w-2xl px-4">
-						<InputsPanel handleSendData={fetchData} usernameNotFound={usernameNotFound} />
-						{
-							response && (
-								<div>
-									<div className="bg-gray-800 p-6 rounded-lg shadow-md">
-										<ResponsePanel
-											time={response.time}
-											explanationMessage={response.explanation_message}
-										/>
-									</div>
-									<div>
-										<DataSeriesChart key={response.unique_key} {...convertTrendChartData(response.trend_chart_data)} />
-									</div>
-								</div>
-							)
-						}
+			<ToastAlertContainer
+				toasts={toasts}
+				removeToast={removeToast}
+			/>
 
+			{/* Main page */}
+			<div className="flex flex-col items-center bg-zinc-900 pt-20 pb-8 min-h-screen sm:px-20 px-3">
+				{/* Components container */}
+				<div className="flex flex-col lg:flex-row justify-center w-full max-w-7xl">
+					{/* Left column with components */}
+					<div className="w-full lg:w-3/4 lg:max-w-2xl px-4">
+						<InputsPanel
+							handleSendData={fetchData}
+							usernameNotFound={usernameNotFound}
+						/>
+						{response && (
+							<div>
+								<ResponsePanel
+									time={response.time}
+									explanationMessage={response.explanation_message}
+								/>
+								<DataSeriesChart
+									key={response.unique_key}
+									{...convertTrendChartData(response.trend_chart_data)}
+								/>
+							</div>
+						)}
 					</div>
 
+					{/* Right column with components */}
 					{response && (
-						<div className="w-1/4 flex flex-col">
+						<div className="w-full lg:w-1/4 px-4 lg:px-0">
 							<ErrorsPanel
 								gamesWithError={response.games_with_errors}
 								totalNumberOfGames={response.games_with_errors.length} // temporary
 							/>
-							<WinRateDonutChart winRate={response.player_win_rate_in_fetched_games} />
-							<FlagPanel key={response.unique_key} {...extractFlagginInfoFromResponse(response)} />
+							<div className="w-full max-w-sm mx-auto lg:py-0 pt-10">
+								<WinRateDonutChart
+									winRate={response.player_win_rate_in_fetched_games}
+								/>
+							</div>
+							<FlagPanel
+								key={response.unique_key}
+								{...extractFlagginInfoFromResponse(response)}
+							/>
 						</div>
 					)}
 				</div>
 			</div>
+
 		</div>
 	);
 }
