@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import SendDataButton from '../common/SendDataButton';
+import GenerateInsightsButton from '../common/GenerateInsightsButton';
 import UsernameInput from '../inputs/UsernameInput';
 import GamesCountInput from '../inputs/GamesCountInput';
 import GameModeInput from '../inputs/GameModeInput';
@@ -38,7 +38,7 @@ export const InputsPanel: React.FC<InputPanelProps> = ({ handleSendData, usernam
             <GamesCountInput  value={gamesCount} onChange={setGamesCount} max={50} /> 
             <GameModeInput value={gameMode} onChange={setGameMode} />
             <UserColorInput value={userColor} onChange={setUserColor} />
-            <SendDataButton onClick={handleClick} />
+            <GenerateInsightsButton onClick={handleClick} />
         </div>
     );
 };
