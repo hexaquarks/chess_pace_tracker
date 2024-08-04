@@ -32,10 +32,10 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ time, explanationMessage 
         <IconGetter />
       </div>
       <div className="flex-col">
-        <p className="text-sm xs:text-md sm:text-lg font-semibold pb-2">
+        <p className="text-xs xs:text-sm sm:text-md md:text-lg font-semibold pb-2">
           {message}
         </p>
-        <p className="text-sm xs:text-sm sm:text-lg">
+        <p className="text-xs xs:text-sm sm:text-md md:text-lg">
           {`Time: ${time}s`}
         </p>
       </div>

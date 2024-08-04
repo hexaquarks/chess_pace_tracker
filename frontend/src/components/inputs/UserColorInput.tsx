@@ -7,11 +7,11 @@ interface UserColorInputProps {
 
 const UserColorInput: React.FC<UserColorInputProps> = ({ value, onChange }) => (
   <div>
-    <label className="block text-white text-sm font-bold mb-2" htmlFor="user-color">
+    <label className="block text-white text-xs xs:text-sm font-bold mb-2" htmlFor="user-color">
       User color
     </label>
     <select
-      className="appearance-auto bg-gray-800 border-none w-full text-white mr-3 py-1 px-2 -ml-1 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+      className="appearance-auto bg-gray-800 text-sm xs:text-base border-none w-full text-white mr-3 py-1 px-2 -ml-1 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
       id="user-color"
       value={value}
       onChange={(e) => onChange(e.target.value)}
