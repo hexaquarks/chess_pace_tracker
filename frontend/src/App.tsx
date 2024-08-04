@@ -86,7 +86,7 @@ const AppContent: React.FC = () => {
 								gamesWithError={response.games_with_errors}
 								totalNumberOfGames={response.games_with_errors.length} // temporary
 							/>
-							<div className="w-full max-w-sm mx-auto lg:py-0 pt-10"> {/* Centering the Donut chart with max width */}
+							<div className="w-full max-w-sm mx-auto lg:py-0 pt-10">
 								<WinRateDonutChart
 									winRate={response.player_win_rate_in_fetched_games}
 								/>
