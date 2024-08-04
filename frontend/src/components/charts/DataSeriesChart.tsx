@@ -29,6 +29,8 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
   // The instance storage is necessary here because the chart's height is updated on window resize.
   const chartRef = useRef<ApexCharts | null>(null);
   const getChartHeight = () => window.innerWidth <= XS_SCREEN_WIDTH ? '200px' : '300px';
+  const getLabelSize = () => window.innerWidth <= XS_SCREEN_WIDTH ? '9px' : '12px';
+  const getStrokeWidth = () => window.innerWidth <= XS_SCREEN_WIDTH ? 3 : 6;
 
   const tooltipFormatter = ({ series, seriesIndex, dataPointIndex, w }: any) => {
     const value = series[seriesIndex][dataPointIndex];
@@ -85,7 +87,7 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
       },
       dataLabels: {
         style: {
-          fontSize: '12px',
+          fontSize: getLabelSize(),
           fontWeight: 'bold',
         },
         background: {
@@ -100,7 +102,7 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
         formatter: signedTimeFormatter
       },
       stroke: {
-        width: 6,
+        width: getStrokeWidth(),
       },
       grid: {
         show: false,
@@ -167,11 +169,19 @@ export const DataSeriesChart: React.FC<DataSeriesChartProps> = ({ times, winStat
 
     // Window resize handler. A chart ref is used to update the chart's height.
     const resizeListener = () => {
-        chartRef.current?.updateOptions({
-          chart: {
-            height: getChartHeight()
-          }
-        });
+      chartRef.current?.updateOptions({
+        chart: {
+          height: getChartHeight()
+        },
+        dataLabels: {
+          style: {
+            fontSize: getLabelSize(),
+          },
+        },
+        stroke: {
+          width: getStrokeWidth(),
+        }
+      });
     };
 
     window.addEventListener('resize', resizeListener);
