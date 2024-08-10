@@ -77,6 +77,7 @@ class BackendRequestPayload:
     games_count: int
     game_mode: GameMode
     user_color: str
+    user_elo: int
     
     def to_json(self) -> Dict[str, Any]:
         return {
@@ -84,15 +85,17 @@ class BackendRequestPayload:
             "games_count": self.games_count,
             "game_mode": self.game_mode.value,
             "user_color": self.user_color,
+            "user_elo": self.user_elo,
         }
     
     @staticmethod
     def from_json(data: Dict[str, Any]) -> "BackendRequestPayload":
         return BackendRequestPayload(
-            user_name=data["username"],
-            games_count=data["games_count"],
-            game_mode=GameMode(data["game_mode"]),
-            user_color=data["user_color"]
+            user_name = data["username"],
+            games_count = data["games_count"],
+            game_mode = GameMode(data["game_mode"]),
+            user_color = data["user_color"],
+            user_elo = data["user_elo"]
         )
 
 @dataclass
@@ -138,13 +141,15 @@ class Processor:
             user_name: str,
             games_count: int,
             game_mode: GameMode, 
-            user_color: str) -> BackendResponse:
+            user_color: str,
+            user_elo: int) -> BackendResponse:
             
             payload = BackendRequestPayload(
-                user_name=user_name,
-                games_count=games_count,
-                game_mode=game_mode,
-                user_color=user_color
+                user_name = user_name,
+                games_count = games_count,
+                game_mode = game_mode,
+                user_color = user_color,
+                user_elo = user_elo 
             )
             try:
                 response = requests.post(
@@ -180,6 +185,7 @@ class Processor:
                 
                 user_info: UserRatingPair = self.get_next_user_rating_pair(user_rating_pairs)
                 user_name = user_info.user_name
+                user_elo = user_info.elo_rating     
                 
                 if user_name in self.processed_users:
                     continue 
@@ -187,7 +193,7 @@ class Processor:
                 print(f"[{datetime.datetime.now()}] Game mode {self.game_mode.value} - processing user: {user_name}")
             
                 try: 
-                    result: BackendResponse = self.process_user(user_name, 10, self.game_mode, "both")
+                    result: BackendResponse = self.process_user(user_name, 10, self.game_mode, "both", user_elo)
                     self.local_results.append(result)
                     self.nb_processed_users_for_curr_game_mode += 1
                     

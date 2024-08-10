@@ -20,7 +20,7 @@ export interface TrendChartDatum {
 }
 
 interface ResponseInformationInternal {
-	time: number;
+	time: string;
 	explanation_message: [string, MessageInformationAssessment]
 	games_with_errors: Array<[number, string]>
 	trend_chart_data: [TrendChartDatum]

@@ -2,7 +2,7 @@ import React from 'react';
 import { ExclamationCircleIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 interface ResponsePanelProps {
-  time: number;
+  time: string;
   explanationMessage: [string, number];
 }
 
@@ -36,7 +36,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({ time, explanationMessage 
           {message}
         </p>
         <p className="text-xs xs:text-sm sm:text-md md:text-lg">
-          {`Time: ${time}s`}
+          {`Time: ${parseFloat(time).toFixed(2)}s`}
         </p>
       </div>
     </div>
