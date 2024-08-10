@@ -5,6 +5,13 @@ import GamesCountInput from '../inputs/GamesCountInput';
 import GameModeInput from '../inputs/GameModeInput';
 import UserColorInput from '../inputs/UserColorInput';
 
+const DefaultPlaceholder = {
+    username: 'DrNykterstein', // Magnus Carlsen
+    gamesCount: 20,            // Number of games to fetch
+    gameMode: 'blitz',         // Blitz is most popular mode
+    userColor: 'both'   
+};
+
 export interface InputProps {
     username: string,
     gamesCount: number,
@@ -18,10 +25,10 @@ interface InputPanelProps {
 }
 
 export const InputsPanel: React.FC<InputPanelProps> = ({ handleSendData, usernameNotFound }) => {
-    const [username, setUsername] = useState<string>('physicskush');
-    const [gamesCount, setGamesCount] = useState<number>(3);
-    const [gameMode, setGameMode] = useState<string>('blitz');
-    const [userColor, setUserColor] = useState<string>('white');
+    const [username, setUsername] = useState<string>(DefaultPlaceholder.username);
+    const [gamesCount, setGamesCount] = useState<number>(DefaultPlaceholder.gamesCount);
+    const [gameMode, setGameMode] = useState<string>(DefaultPlaceholder.gameMode);
+    const [userColor, setUserColor] = useState<string>(DefaultPlaceholder.userColor);
 
     const handleClick = () => {
         handleSendData({
