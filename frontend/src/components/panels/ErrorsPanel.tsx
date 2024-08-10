@@ -10,7 +10,7 @@ const ErrorsPanel: React.FC<ErrorsPanelProps> = ({ gamesWithError, totalNumberOf
     if (!gamesWithError || gamesWithError.length === 0) {
         return (
             <div className="flex flex-col items-center space-x-2 p-4 rounded-lg bg-gray-800 text-white w-full">
-                <div className="text-center text-white">No errors were found.</div>
+                <div className="text-center text-white">No games were skipped in the analysis.</div>
             </div>
         )
     }

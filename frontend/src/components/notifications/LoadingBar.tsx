@@ -7,15 +7,19 @@ interface LoadingBarProps {
 
 const LoadingBar: React.FC<LoadingBarProps> = ({ progress }) => {
     const [currentGameStr, totalGamesStr] = progress.replace('Game ', '').split('/');
-    const currentGame = parseInt(currentGameStr) || 0;
-    const totalGames = parseInt(totalGamesStr) || 1; // Avoid division by zero
-    const progressValue = (currentGame / totalGames) * 100;
+    const currentGame: number = parseInt(currentGameStr) || 0;
+    const totalGames: number | null = parseInt(totalGamesStr) || null;
+    const progressValue: number = (currentGame / (totalGames || 1)) * 100; // Divided by 1 to avoid division by zero
 
     return (
         <div className="flex flex-col bg-gray-800 p-6 rounded-lg shadow-lg w-2/3 max-w-2xl text-white">
             <div className="mb-2">
                 <h3 className="text-lg font-bold">Loading games...</h3>
-                <p className="text-sm">Game {currentGame} out of {totalGames} have been loaded</p>
+                {
+                    totalGames && (
+                        <p className="text-sm">Game {currentGame} out of {totalGames} have been loaded</p>
+                    )
+                }
             </div>
             <ProgressBar
                 completed={progressValue}
