@@ -5,7 +5,8 @@ use crate::service_intermediary::GameFetchWarning;
 use crate::unit_test_util;
 use crate::util;
 
-const MIN_NUMBER_OF_MOVES_IN_GAME: usize = 12;
+const MIN_NUMBER_OF_PLIES_IN_GAME: usize = 30;  // At least 15 moves in the game to consider it for
+                                                // the analysis.
 
 /// Heuristics:
 //  It really doesn't matter logistically if the half time differential is slightly offset.
@@ -58,7 +59,7 @@ pub fn get_half_time_differentials(
             // Skip it from the computation.
             continue;
         }
-        if !is_testing && game_info.timed_moves.len() < MIN_NUMBER_OF_MOVES_IN_GAME {
+        if !is_testing && game_info.timed_moves.len() < MIN_NUMBER_OF_PLIES_IN_GAME {
             // Consider this block only in release.
             // skip this game and add it to vector of warnings with warning
             skipped_games
