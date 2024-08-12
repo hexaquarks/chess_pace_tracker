@@ -50,14 +50,14 @@ const WinRateDonutChart: React.FC<WinRateDonutChartProps> = ({ winRate }) => {
                                 show: true,
                                 fontFamily: "Inter, sans-serif",
                                 offsetY: 20,
-                                color: 'red'
+                                color: 'aliceblue',
                             },
                             total: {
                                 showAlways: true,
                                 show: true,
                                 label: "Win ratio",
                                 fontFamily: "Inter, sans-serif",
-                                color: 'red',
+                                color: 'aliceblue',
                                 formatter: function (w: any) {
                                     return w.globals.series[0].toFixed(0) + "%"
                                 },
@@ -66,7 +66,7 @@ const WinRateDonutChart: React.FC<WinRateDonutChartProps> = ({ winRate }) => {
                                 show: true,
                                 fontFamily: "Inter, sans-serif",
                                 offsetY: -20,
-                                color: 'red',
+                                color: 'aliceblue',
                                 formatter: function (value: String) {
                                     return value + "k"
                                 },
