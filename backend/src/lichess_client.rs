@@ -49,11 +49,11 @@ pub async fn process_response_stream(
     request_data: &ChessDataRequest,
     request_response: Response,
     skipped_games: &mut HashMap<usize, GameFetchWarning>,
-    websocket_addr: &Addr<WebSocketSession>,
+    opt_websocket_addr: &Option<Addr<WebSocketSession>>,
 ) -> Result<(), Error> {
     let games_info_arc = Arc::new(Mutex::new(games_info));
     let skipped_games_arc = Arc::new(Mutex::new(skipped_games));
-    let websocket_addr_arc = Arc::new(Mutex::new(websocket_addr.clone()));
+    let opt_websocket_addr_arc = Arc::new(Mutex::new(opt_websocket_addr.clone()));
     let game_idx_arc = Arc::new(Mutex::new(0));
 
     let stream = request_response.bytes_stream().map_err(convert_err);
@@ -74,12 +74,15 @@ pub async fn process_response_stream(
                 ));
 
                 // Notify client that one of the games requested has been processed (for loading bar).
-                let mut websocket_addr_lock = websocket_addr_arc.lock().await.clone();
-                util::send_websocket_message(
-                    &mut websocket_addr_lock,
-                    &(*game_idx_lock),
-                    &request_data.games_count,
-                );
+                if opt_websocket_addr.is_some() {
+                    let mut websocket_addr_lock = opt_websocket_addr_arc.lock().await;
+                    util::send_websocket_message(
+                        &websocket_addr_lock.clone().unwrap(),
+                        game_idx_lock.clone(),
+                        &request_data.games_count,
+                    );
+                }
+
                 *game_idx_lock += 1;
             }
             Err(_) => {
@@ -100,7 +103,7 @@ pub async fn handle_successful_response(
     request_data: &ChessDataRequest,
     requested_by: RequestSource,
     response: Response,
-    websocket_addr: &Addr<WebSocketSession>,
+    opt_websocket_addr: &Option<Addr<WebSocketSession>>,
 ) -> Result<HttpResponse, Error> {
     let mut skipped_games: HashMap<usize, GameFetchWarning> = HashMap::new();
     let mut games_info: Vec<GameInfo> = Vec::new();
@@ -111,7 +114,7 @@ pub async fn handle_successful_response(
         request_data,
         response,
         &mut skipped_games,
-        websocket_addr,
+        opt_websocket_addr,
     )
     .await?;
 
@@ -170,7 +173,7 @@ pub async fn handle_successful_response(
 pub async fn fetch_player_data(
     request_data: &ChessDataRequest,
     requested_by: RequestSource,
-    websocket_addr: &Addr<WebSocketSession>,
+    opt_websocket_addr: &Option<Addr<WebSocketSession>>,
 ) -> Result<HttpResponse, Error> {
     let url = get_url(&request_data);
     let client = reqwest::Client::new();
@@ -185,7 +188,7 @@ pub async fn fetch_player_data(
         })?;
 
     if response.status().is_success() {
-        handle_successful_response(request_data, requested_by, response, websocket_addr).await
+        handle_successful_response(request_data, requested_by, response, opt_websocket_addr).await
     } else {
         let status = response.status();
         let error_message = response

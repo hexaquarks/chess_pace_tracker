@@ -123,12 +123,19 @@ pub async fn fetch_chess_data(
             .and_then(|header_value| header_value.to_str().ok()),
     );
 
-    let websocket_addr = {
-        let websocket_addr = WEBSOCKET_ADDR.lock().unwrap();
-        websocket_addr.clone().expect("WebSocket address missing")
+    // If the POST request is from a client, lazy initialize a websocket.
+    let opt_websocket_addr = match requested_by {
+        RequestSource::Frontend => Some(
+            WEBSOCKET_ADDR
+                .lock()
+                .unwrap()
+                .clone()
+                .expect("Websocket address missing"),
+        ),
+        _ => None,
     };
 
-    match lichess_client::fetch_player_data(&info, requested_by, &websocket_addr).await {
+    match lichess_client::fetch_player_data(&info, requested_by, &opt_websocket_addr).await {
         Ok(response) => {
             let end_time = Instant::now();
             let processing_time = end_time.duration_since(start_time).as_secs_f32();
