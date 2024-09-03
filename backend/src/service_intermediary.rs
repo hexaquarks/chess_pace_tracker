@@ -5,11 +5,10 @@ use crate::database;
 use crate::deserialization;
 use crate::lichess_client;
 use crate::trend_chart_generator::TrendChartDatum;
-use crate::websocket::{WebSocketSession, WEBSOCKET_ADDR};
+use crate::websocket::WEBSOCKET_ADDR;
 
-use actix::Addr;
 use actix_web::ResponseError;
-use actix_web::{http::header, post, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
