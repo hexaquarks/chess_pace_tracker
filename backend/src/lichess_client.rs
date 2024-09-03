@@ -2,7 +2,6 @@ use actix::Addr;
 use std::collections::HashMap;
 
 use crate::deserialization::GameJson;
-use crate::errors_manager::{self, ProcessError};
 use crate::games_info_generator::{self, get_opponents_and_their_rating, GameInfo};
 use crate::games_info_processor::{
     get_half_time_differentials, process_average_time, process_flag_info, process_win_rate,
@@ -13,7 +12,7 @@ use crate::service_intermediary::{
 };
 use crate::trend_chart_generator;
 use crate::util;
-use crate::websocket::{WebSocketSession, WebSocketTextMessage};
+use crate::websocket::WebSocketSession;
 
 use actix_web::{Error, HttpResponse};
 use futures_util::TryStreamExt;
@@ -75,7 +74,7 @@ pub async fn process_response_stream(
 
                 // Notify client that one of the games requested has been processed (for loading bar).
                 if opt_websocket_addr.is_some() {
-                    let mut websocket_addr_lock = opt_websocket_addr_arc.lock().await;
+                    let websocket_addr_lock = opt_websocket_addr_arc.lock().await;
                     util::send_websocket_message(
                         &websocket_addr_lock.clone().unwrap(),
                         game_idx_lock.clone(),

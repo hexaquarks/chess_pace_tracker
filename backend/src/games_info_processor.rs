@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-use crate::games_info_generator::{self, GameInfo, TimedMove};
+use crate::games_info_generator::{GameInfo, TimedMove};
 use crate::service_intermediary::GameFetchWarning;
-use crate::unit_test_util;
 use crate::util;
 
 const MIN_NUMBER_OF_PLIES_IN_GAME: usize = 30;  // At least 15 moves in the game to consider it for

@@ -1,4 +1,4 @@
-use actix_web::{http::StatusCode, web::Json, HttpResponse, ResponseError};
+use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 use serde::Serialize;
 
 const S_FETCH_ERROR_: &str =

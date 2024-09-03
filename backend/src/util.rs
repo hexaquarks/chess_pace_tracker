@@ -1,7 +1,7 @@
 use actix::Addr;
 use std::collections::HashMap;
 
-use crate::games_info_generator::{GameInfo, TimedMove};
+use crate::games_info_generator::GameInfo;
 use crate::service_intermediary::GameFetchWarning;
 use crate::websocket::{WebSocketSession, WebSocketTextMessage};
 
