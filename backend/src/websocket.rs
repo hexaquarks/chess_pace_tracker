@@ -55,6 +55,15 @@ impl WebSocketSession {
             ctx.ping(b"");
         });
     }
+    fn stop_gracefully(&mut self, ctx: &mut ws::WebsocketContext<Self>) {
+        println!("Stopping WebSocket session gracefully");
+
+        // Remove the address from the global WEBSOCKET_ADDR
+        let mut websocket_addr = WEBSOCKET_ADDR.lock().unwrap();
+        *websocket_addr = None;
+
+        ctx.stop();
+    }
 }
 
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WebSocketSession {
@@ -66,6 +75,11 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WebSocketSession 
             }
             Ok(ws::Message::Pong(_)) => {
                 self.heart_beat = Instant::now();
+            }
+            Ok(ws::Message::Close(_)) => {
+                // In case in the future I add functionality from the client side to manually
+                // close the server websocket.
+                self.stop_gracefully(ctx);
             }
             Ok(ws::Message::Text(text)) => ctx.text(text),
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
@@ -81,7 +95,7 @@ pub async fn add_websocket_endpoint(
     println!("WebSocket endpoint hit");
     let ws_session = WebSocketSession::new();
     let (addr, response) =
-        ws::WsResponseBuilder::new(ws_session, &request, stream).start_with_addr()?;
+    ws::WsResponseBuilder::new(ws_session, &request, stream).start_with_addr()?;
 
     // Store the WebSocket address in the global variable
     {

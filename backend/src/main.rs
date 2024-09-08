@@ -22,6 +22,7 @@ async fn main() -> std::io::Result<()> {
     database::create_database()
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
 
+    // Note: HttServer already implements graceful shutdown through ::shutdown_timeout().
     HttpServer::new(|| {
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000")
