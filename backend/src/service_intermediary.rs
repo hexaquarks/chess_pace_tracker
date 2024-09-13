@@ -5,10 +5,14 @@ use crate::database;
 use crate::deserialization;
 use crate::lichess_client;
 use crate::trend_chart_generator::TrendChartDatum;
-use crate::websocket::WEBSOCKET_ADDR;
+use crate::websocket;
+use crate::websocket::StopWebsocket;
+use crate::websocket::WebSocketSession;
 
 use actix_web::ResponseError;
 use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
+use actix::Addr;
+use websocket::AppState;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
@@ -68,7 +72,7 @@ impl ChessDataResponse {
         players_flag_counts: (i32, i32),
     ) -> Self {
         let errors_vec =
-            deserialization::convert_games_with_errors_to_displayable_format(games_with_errors);
+        deserialization::convert_games_with_errors_to_displayable_format(games_with_errors);
 
         ChessDataResponse::RequestFromFrontend {
             time,
@@ -110,10 +114,47 @@ impl RequestSource {
     }
 }
 
+pub fn get_websocket_address(
+    requested_by: &RequestSource,
+    app_state: &web::Data<AppState>,
+) -> Option<Addr<WebSocketSession>> {
+    match requested_by {
+        RequestSource::Frontend => {
+            let websocket_session = app_state.websocket_session.lock().unwrap();
+            websocket_session.clone()
+        }
+        _ => None,
+    }
+}
+
+pub async fn close_websocket(
+    opt_websocket_addr: &Option<Addr<WebSocketSession>>, 
+    app_state: &web::Data<AppState>,
+) -> Result<(), std::string::String> {
+    if let Some(websocket_addr) = opt_websocket_addr {
+        websocket_addr
+            .send(websocket::WebSocketTextMessage("All games processed. Closing connection.".to_string()))
+            .await
+            .map_err(|e| format!("The websocket was not properly closed: {:?}", e))?;
+        websocket_addr
+            .send(StopWebsocket)
+            .await
+            .map_err(|e| format!("The websocket was not properly closed: {:?}", e))?;
+
+        // Remove the WebSocket session from AppState. It will be reinstanciated on the next POST
+        // request.
+        let mut websocket_session = app_state.websocket_session.lock().unwrap();
+        *websocket_session = None;
+    }
+
+    Ok(())
+}
+
 #[post("/fetch-chess-data")]
 pub async fn fetch_chess_data(
     info: web::Json<ChessDataRequest>,
     req: HttpRequest,
+    app_state: web::Data<AppState>,
 ) -> impl Responder {
     let start_time = Instant::now();
     let requested_by = RequestSource::from_str(
@@ -122,19 +163,16 @@ pub async fn fetch_chess_data(
             .and_then(|header_value| header_value.to_str().ok()),
     );
 
-    // If the POST request is from a client, lazy initialize a websocket.
-    let opt_websocket_addr = match requested_by {
-        RequestSource::Frontend => Some(
-            WEBSOCKET_ADDR
-                .lock()
-                .unwrap()
-                .clone()
-                .expect("Websocket address missing"),
-        ),
-        _ => None,
-    };
+    // Channel game processing updates to the client through a websocket.
+    let opt_websocket_addr = get_websocket_address(&requested_by, &app_state);
 
-    match lichess_client::fetch_player_data(&info, requested_by, &opt_websocket_addr).await {
+    // Fetch player data and send updates via WebSocket for accurate progression rate.
+    let fetch_result = lichess_client::fetch_player_data(&info, requested_by, &opt_websocket_addr).await;
+
+    // TODO: Handle error. Close the WebSocket after processing all games.
+    close_websocket(&opt_websocket_addr, &app_state).await.ok();
+        
+    match fetch_result {
         Ok(response) => {
             let end_time = Instant::now();
             let processing_time = end_time.duration_since(start_time).as_secs_f32();

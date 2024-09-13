@@ -15,7 +15,6 @@ const useWebSocketHook = ({setFetchProgress, shouldConnectToWebsocket }: WebSock
         onOpen: () => setIsWebsocketConnected(true),
         onClose: () => setIsWebsocketConnected(false),
         onMessage: (message) => setFetchProgress(message.data),
-        share: true, // TODO: getWebSocket().close() asserts because of this, can't find a fix rn.
     }, shouldConnectToWebsocket);
 
     useEffect(() => {
@@ -29,11 +28,7 @@ const useWebSocketHook = ({setFetchProgress, shouldConnectToWebsocket }: WebSock
         }
     }, [lastMessage]);
 
-    const closeWebsocketConnection = () => {
-        getWebSocket()?.close();
-    };
-
-    return { isWebsocketConnected, closeWebsocketConnection };
+    return { isWebsocketConnected  };
 };
 
 export default useWebSocketHook;
