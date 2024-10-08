@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/chess-pace-tracker/static/css/main.0106104c.css",
+    "main.js": "/chess-pace-tracker/static/js/main.1594b202.js",
+    "index.html": "/chess-pace-tracker/index.html",
+    "main.0106104c.css.map": "/chess-pace-tracker/static/css/main.0106104c.css.map",
+    "main.1594b202.js.map": "/chess-pace-tracker/static/js/main.1594b202.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0106104c.css",
+    "static/js/main.1594b202.js"
+  ]
+}
