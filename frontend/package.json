@@ -1,4 +1,5 @@
 {
+  "homepage": "https://hexaquarks.github.io/chess-pace-tracker/",
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
@@ -16,6 +17,7 @@
     "autoprefixer": "^10.4.16",
     "bootstrap": "^5.3.3",
     "flowbite": "^2.2.1",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.4.33",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.4",
@@ -30,6 +32,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
