@@ -1,10 +1,7 @@
 # Chess Pace Tracker
 
-> 🛠️ An MVP is still under construction.
+<img src="https://github.com/user-attachments/assets/ee70fe19-dc85-4f54-9f33-85604e60b158" width=75% height=75%>
 
 ### Description and Goals
 Chess Pace Tracker is an innovative tool designed for online chess players. 
 It provides insights into a player's time management during games, a critical component of competitive play, especially in faster-paced variants.
-
-As the popularity of speed chess increases, time-management skills are ever more important.
-The Chess Pace Tracker serves this need by enabling players to analyze their pacing, compare it with opponents, and identify areas for improvement.
