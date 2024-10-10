@@ -1,4 +1,4 @@
-use crate::service_intermediary::DescriptionMessageAssessment;
+use crate::service_intermediary::{ChessDataRequest, DescriptionMessageAssessment};
 
 const INVALID_TIME_DESCRIPTION_PLACEHOLDER_MSG: &str =
     "The time value was not computed. Check the errors panel for more information.";
@@ -21,7 +21,10 @@ impl MessageContext {
         }
     }
 
-    pub fn generate_message(&self) -> (String, DescriptionMessageAssessment) {
+    pub fn generate_message(
+        &self,
+        request_data: &ChessDataRequest,
+    ) -> (String, DescriptionMessageAssessment) {
         if self.average_time == std::f32::MAX {
             return (
                 INVALID_TIME_DESCRIPTION_PLACEHOLDER_MSG.to_string(),
@@ -31,15 +34,15 @@ impl MessageContext {
 
         let (status_message, assessment) = match self.average_time.partial_cmp(&0.0).unwrap() {
             std::cmp::Ordering::Less => (
-                "behind your opponent by",
+                "behind their opponents by",
                 DescriptionMessageAssessment::Negative,
             ),
             std::cmp::Ordering::Equal => (
-                "equal in time to your opponent",
+                "equal in time to their opponents",
                 DescriptionMessageAssessment::Neutral,
             ),
             std::cmp::Ordering::Greater => (
-                "ahead of your opponent by",
+                "ahead of their opponents by",
                 DescriptionMessageAssessment::Positive,
             ),
         };
@@ -51,8 +54,8 @@ impl MessageContext {
         };
 
         let message = format!(
-            "On average, you are {}{} at half time in the games.",
-            status_message, time_message
+            "On average, {} is {}{} at half time in the games.",
+            request_data.username, status_message, time_message
         );
 
         (message, assessment)
@@ -71,9 +74,10 @@ pub fn get_average_time_as_formatted_string(
 
 pub fn get_feedback_message(
     average_half_time_differential_opt: Option<f32>,
+    request_data: &ChessDataRequest,
 ) -> (String, DescriptionMessageAssessment) {
     let context = MessageContext::new(average_half_time_differential_opt);
-    context.generate_message()
+    context.generate_message(request_data)
 }
 
 pub fn get_win_ratio_as_formatted_string(player_win_rate_in_fetched_games: f32) -> String {
@@ -83,10 +87,11 @@ pub fn get_win_ratio_as_formatted_string(player_win_rate_in_fetched_games: f32) 
 pub fn get_insights(
     average_half_time_differential_opt: Option<f32>,
     player_win_rate_in_fetched_games: f32,
+    request_data: &ChessDataRequest,
 ) -> InsightsPanelProps {
     InsightsPanelProps {
         average_time: get_average_time_as_formatted_string(average_half_time_differential_opt),
-        explanation_message: get_feedback_message(average_half_time_differential_opt),
+        explanation_message: get_feedback_message(average_half_time_differential_opt, request_data),
         win_ratio: get_win_ratio_as_formatted_string(player_win_rate_in_fetched_games),
     }
 }

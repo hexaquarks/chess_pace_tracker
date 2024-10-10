@@ -153,7 +153,8 @@ pub async fn handle_successful_response(
         trend_chart_generator::generate(&games_info, &skipped_games, half_time_differentials);
 
     // =========== STEP 7: Generate Insights ===========
-    let insights: InsightsPanelProps = insight_generator::get_insights(average_time, win_rate);
+    let insights: InsightsPanelProps =
+        insight_generator::get_insights(average_time, win_rate, request_data);
 
     // For UI testing purposes:
     //    Adding a bunch of games with error message for errors side panel
