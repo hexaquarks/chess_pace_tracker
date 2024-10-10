@@ -23,12 +23,12 @@ const ErrorsPanel: React.FC<ErrorsPanelProps> = ({ gamesWithError, totalNumberOf
             <div className="flex flex-col items-center bg-zinc-900 text-white w-full">
                 <div className="w-full pl-2 rounded-lg shadow md:flex-row bg-gray-800">
                     <div className="flex flex-col justify-between w-full p-4 leading-normal">
-                        <span className="text-xl font-bold tracking-tight text-balck text-center">{gamesWithError.length === 0 ? `No games were skipped` : `${gamesWithError.length} of ${totalNumberOfGames} games were skipped`}</span>
+                        <span className="text-xl font-bold tracking-tight text-balck text-center">{gamesWithError.length === 0 ? `No games were skipped` : `${gamesWithError.length} games were skipped in the analysis`}</span>
                     </div>
                 </div>
                 {gamesWithError.map(([gameNumber, errorMessage], i) => (
-                    <div 
-                        key={i} 
+                    <div
+                        key={i}
                         className="flex flex-row items-center w-full pl-3 mt-1 bg-gray-800 rounded-lg shadow md:flex-row hover:bg-gray-700"
                     >
                         <ExclamationTriangleIcon className={`${iconSize} text-yellow-500`} />
